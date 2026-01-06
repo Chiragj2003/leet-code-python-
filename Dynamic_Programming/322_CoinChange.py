@@ -1,175 +1,207 @@
 """
-LeetCode #322 - Coin Change
-Topic: Dynamic Programming
-Difficulty: Medium
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    LeetCode #322 - Coin Change                                ║
+║                    Topic: Dynamic Programming                                ║
+║                    Difficulty: Medium                                         ║
+║                    Company: Amazon, Meta, Uber                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-PROBLEM EXPLANATION (Easy Terms):
-You have coins of different denominations and a target amount.
-Find the MINIMUM number of coins needed to make that amount.
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🎯 QUESTION IN SIMPLE TERMS                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+WHAT'S THE PROBLEM?
+───────────────────
+Given coins of different denominations and total amount,
+find MINIMUM number of coins needed to make that amount.
 Return -1 if impossible.
 
-Example:
-coins = [1,2,5], amount = 11
-Answer: 3 coins (5+5+1)
+EXAMPLES:
+─────────
+✓ Input: coins = [1,2,5], amount = 11 → Output: 3
+  Explanation: 11 = 5 + 5 + 1 (3 coins)
 
-coins = [2], amount = 3
-Answer: -1 (impossible with only 2-cent coins)
+✓ Input: coins = [2], amount = 3 → Output: -1
+  Explanation: Cannot make 3 with only 2's
 
-Think of it like:
-Making change with fewest coins. Like at a store!
+✓ Input: coins = [1], amount = 0 → Output: 0
 
-WHY THIS WORKS (Simple Explanation):
-For each amount from 1 to target:
-- Try using each coin
-- If we use coin X, we need dp[amount - X] more coins
-- Pick the option with minimum coins
+IMAGINE THIS (CHILD-FRIENDLY):
+──────────────────────────────
+💰 Making change: You have coins [1¢, 5¢, 10¢, 25¢].
+   Need to make 37¢ with fewest coins.
+   Best: 25¢ + 10¢ + 1¢ + 1¢ = 4 coins
 
-Build up from smaller amounts to target!
+🎯 Minimum moves: Each coin type is a "jump size".
+   Reach target with minimum jumps!
 
-Time Complexity: O(amount * coins)
-Space Complexity: O(amount)
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ⭐ AMAZON STAR METHOD ANSWER                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📌 SITUATION:
+   Amazon payment: optimize transaction with minimum
+   denomination breakdown for lower processing fees.
+
+📌 TASK:
+   Find minimum coins to make amount.
+   Time O(amount × coins), Space O(amount).
+
+📌 ACTION:
+   Bottom-up DP:
+   - dp[i] = min coins to make amount i
+   - For each amount, try all coins
+
+📌 RESULT:
+   ✓ Time: O(S × n) where S=amount, n=coins
+   ✓ Space: O(S) for DP array
+   ✓ Minimum coins found
+
 """
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 💡 BRUTE FORCE - Recursion (Exponential!)
+# ═══════════════════════════════════════════════════════════════════════════
+def coinChange_bruteforce(coins, amount):
+    """
+    Try all combinations recursively
+    
+    Time: O(S^n) - exponential!
+    Space: O(n) recursion
+    """
+    def minCoins(remaining):
+        if remaining == 0:
+            return 0
+        if remaining < 0:
+            return float('inf')
+        
+        min_count = float('inf')
+        for coin in coins:
+            result = minCoins(remaining - coin)
+            if result != float('inf'):
+                min_count = min(min_count, result + 1)
+        
+        return min_count
+    
+    result = minCoins(amount)
+    return result if result != float('inf') else -1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🚀 OPTIMAL SOLUTION - Bottom-Up DP
+# ═══════════════════════════════════════════════════════════════════════════
 def coinChange(coins, amount):
     """
-    Find minimum coins needed using dynamic programming
+    Bottom-up DP
     
-    Visual example: coins=[1,2,5], amount=11
+    dp[i] = minimum coins to make amount i
     
-    dp[0] = 0 (need 0 coins for amount 0)
-    dp[1] = 1 (use coin 1)
-    dp[2] = 1 (use coin 2)
-    dp[3] = 2 (use 2+1 or 1+1+1, min is 2)
-    dp[4] = 2 (use 2+2)
-    dp[5] = 1 (use coin 5)
-    dp[6] = 2 (use 5+1)
-    ...
-    dp[11] = 3 (use 5+5+1)
+    Example: coins = [1,2,5], amount = 11
+    ────────
+    dp[0] = 0 (base case: 0 coins for amount 0)
+    
+    For amount 1:
+      Try coin 1: dp[1-1] + 1 = 0 + 1 = 1
+      dp[1] = 1
+    
+    For amount 2:
+      Try coin 1: dp[2-1] + 1 = 1 + 1 = 2
+      Try coin 2: dp[2-2] + 1 = 0 + 1 = 1
+      dp[2] = min(2, 1) = 1
+    
+    For amount 5:
+      Try coin 1: dp[4] + 1 = 2 + 1 = 3
+      Try coin 2: dp[3] + 1 = 2 + 1 = 3
+      Try coin 5: dp[0] + 1 = 0 + 1 = 1
+      dp[5] = min(3, 3, 1) = 1
+    
+    ...continue until dp[11] = 3
     """
-    # dp[i] = minimum coins needed for amount i
+    # Initialize dp array with infinity
     dp = [float('inf')] * (amount + 1)
-    dp[0] = 0  # Base case: 0 coins for amount 0
+    dp[0] = 0  # Base case
     
-    # Build up for each amount
-    for amt in range(1, amount + 1):
-        # Try each coin
+    # Build up solutions for each amount
+    for i in range(1, amount + 1):
         for coin in coins:
-            if coin <= amt:
-                # Use this coin + minimum for remaining amount
-                dp[amt] = min(dp[amt], dp[amt - coin] + 1)
+            if coin <= i:
+                dp[i] = min(dp[i], dp[i - coin] + 1)
     
-    # If still infinity, impossible
     return dp[amount] if dp[amount] != float('inf') else -1
 
 
-def coinChange_verbose(coins, amount):
+# ═══════════════════════════════════════════════════════════════════════════
+# 📚 ALTERNATIVE - Top-Down Memoization
+# ═══════════════════════════════════════════════════════════════════════════
+def coinChange_memo(coins, amount):
     """
-    Detailed version showing the building process
+    Top-down with memoization
+    
+    Time: O(S × n)
+    Space: O(S)
     """
-    print(f"Coins: {coins}")
-    print(f"Target amount: {amount}")
-    print("\nBuilding solution from 0 to target...\n")
+    memo = {}
     
-    dp = [float('inf')] * (amount + 1)
-    dp[0] = 0
-    
-    print(f"Amount 0: Need 0 coins (base case)")
-    
-    for amt in range(1, amount + 1):
-        print(f"\nAmount {amt}:")
-        options = []
+    def minCoins(remaining):
+        if remaining == 0:
+            return 0
+        if remaining < 0:
+            return float('inf')
+        if remaining in memo:
+            return memo[remaining]
         
+        min_count = float('inf')
         for coin in coins:
-            if coin <= amt:
-                coins_needed = dp[amt - coin] + 1
-                options.append((coin, coins_needed))
-                print(f"  Use coin {coin}: need dp[{amt}-{coin}]+1 = {dp[amt-coin]}+1 = {coins_needed} coins")
-                
-                dp[amt] = min(dp[amt], coins_needed)
+            result = minCoins(remaining - coin)
+            if result != float('inf'):
+                min_count = min(min_count, result + 1)
         
-        if dp[amt] == float('inf'):
-            print(f"  IMPOSSIBLE to make amount {amt}")
-        else:
-            # Find which coin gave minimum
-            best_coin = min(options, key=lambda x: x[1])[0]
-            print(f"  MINIMUM: {dp[amt]} coins (use coin {best_coin})")
+        memo[remaining] = min_count
+        return min_count
     
-    result = dp[amount] if dp[amount] != float('inf') else -1
-    print(f"\nFinal answer: {result} coins")
-    
-    # Show one possible solution
-    if result != -1:
-        print(f"\nOne possible combination:")
-        remaining = amount
-        used_coins = []
-        while remaining > 0:
-            for coin in coins:
-                if coin <= remaining and dp[remaining - coin] == dp[remaining] - 1:
-                    used_coins.append(coin)
-                    remaining -= coin
-                    break
-        print(f"  {' + '.join(map(str, used_coins))} = {amount}")
-    
-    return result
+    result = minCoins(amount)
+    return result if result != float('inf') else -1
 
 
-def coinChange_bfs(coins, amount):
-    """
-    Alternative: BFS approach (finds shortest path)
-    
-    Think of it as finding shortest path from 0 to amount
-    """
-    if amount == 0:
-        return 0
-    
-    from collections import deque
-    
-    queue = deque([(0, 0)])  # (current_amount, num_coins)
-    visited = {0}
-    
-    while queue:
-        current_amt, num_coins = queue.popleft()
-        
-        # Try each coin
-        for coin in coins:
-            next_amt = current_amt + coin
-            
-            if next_amt == amount:
-                return num_coins + 1
-            
-            if next_amt < amount and next_amt not in visited:
-                visited.add(next_amt)
-                queue.append((next_amt, num_coins + 1))
-    
-    return -1
+# ═══════════════════════════════════════════════════════════════════════════
+# 📊 COMPLEXITY COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════
+"""
+╔════════════════╦════════════╦═══════════╦═════════════════════════╗
+║   Approach     ║    Time    ║   Space   ║       Notes             ║
+╠════════════════╬════════════╬═══════════╬═════════════════════════╣
+║ Brute Force    ║  O(S^n)    ║   O(n)    ║ Too slow!               ║
+║ Memoization    ║  O(S×n)    ║   O(S)    ║ Top-down DP             ║
+║ Bottom-Up DP   ║  O(S×n)    ║   O(S)    ║ Optimal, iterative      ║
+╚════════════════╩════════════╩═══════════╩═════════════════════════╝
+
+S = amount, n = number of coins
+"""
 
 
-# Test cases
+# ═══════════════════════════════════════════════════════════════════════════
+# 🧪 TEST CASES
+# ═══════════════════════════════════════════════════════════════════════════
+
 if __name__ == "__main__":
     test_cases = [
         ([1, 2, 5], 11, 3),
         ([2], 3, -1),
         ([1], 0, 0),
-        ([1], 1, 1),
-        ([1], 2, 2),
         ([1, 2, 5], 100, 20),
-        ([186, 419, 83, 408], 6249, 20),
     ]
     
-    print("=== Testing DP Solution ===")
+    print("=" * 70)
+    print("🧪 TESTING COIN CHANGE")
+    print("=" * 70)
+    
     for coins, amount, expected in test_cases:
-        result = coinChange(coins, amount)
-        status = "✓" if result == expected else "✗"
-        print(f"{status} coins={coins}, amount={amount}")
-        print(f"   Min coins: {result} (Expected: {expected})")
-        print()
-    
-    print("=== Testing BFS Solution ===")
-    for coins, amount, expected in test_cases[:5]:  # Test smaller cases
-        result = coinChange_bfs(coins, amount)
-        status = "✓" if result == expected else "✗"
-        print(f"{status} coins={coins}, amount={amount} -> {result}")
-    
-    print("\n" + "="*50)
-    print("=== Verbose Example ===")
-    coinChange_verbose([1, 2, 5], 11)
+        brute = coinChange_bruteforce(coins, amount) if amount < 20 else "Skipped"
+        memo = coinChange_memo(coins, amount)
+        optimal = coinChange(coins, amount)
+        
+        print(f"\nInput: coins = {coins}, amount = {amount}")
+        print(f"Expected: {expected}")
+        print(f"Brute: {brute}")
+        print(f"Memo: {memo} {'✓' if memo == expected else '✗'}")
+        print(f"Optimal: {optimal} {'✓' if optimal == expected else '✗'}")

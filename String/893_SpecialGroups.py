@@ -1,54 +1,79 @@
-"""
-LeetCode #893 - Groups of Special-Equivalent Strings
-Topic: String
-Difficulty: Medium
+﻿"""
 
-PROBLEM EXPLANATION:
-Two strings are special-equivalent if after any number of swaps of characters
-at even indices or odd indices separately, they become equal.
-Return the number of groups of special-equivalent strings.
+              LeetCode #893 - Groups of Special-Equivalent Strings            
+              Topic: String/HashMap | Difficulty: Medium                      
+              Company: Google                                                 
+
+
+PROBLEM: Count groups where strings are special-equivalent.
+Special-equivalent: can swap chars at even indices with each other,
+and chars at odd indices with each other.
 
 Example:
-Input: words = ["abcd","cdab","cbad","xyzz","zzxy","zzyx"]
-Output: 3
-Explanation: Groups are ["abcd","cdab","cbad"], ["xyzz","zzxy","zzyx"], []
-
-APPROACH:
-1. For each string, separate into even and odd indexed characters
-2. Sort both groups
-3. Use sorted tuple as signature
-4. Count unique signatures
-
-Time Complexity: O(n * m log m)
-Space Complexity: O(n * m)
+  ["abcd","cdab","cbad","xyzz","zzxy","zzyx"]
+   3 groups
 """
 
+#  SOLUTION 1: Sort Even/Odd as Signature (OPTIMAL)
 def numSpecialEquivGroups(words):
     """
-    Returns number of special-equivalent groups
+    Use sorted even/odd chars as signature
+    Time: O(n * k log k), Space: O(n*k)
+    where n=len(words), k=max word length
+    
+    Two strings are equivalent if they have same sorted even/odd chars.
     """
-    def get_signature(word):
-        # Separate even and odd indexed characters
-        even = ''.join(sorted(word[::2]))
+    def signature(word):
+        even = ''.join(sorted(word[0::2]))
         odd = ''.join(sorted(word[1::2]))
         return (even, odd)
     
-    # Use set to count unique signatures
-    signatures = set()
-    
+    groups = set()
     for word in words:
-        signatures.add(get_signature(word))
+        groups.add(signature(word))
     
-    return len(signatures)
+    return len(groups)
 
 
-# Test cases
+#  SOLUTION 2: Count Even/Odd Characters
+def numSpecialEquivGroups_count(words):
+    """
+    Count frequency of chars at even/odd positions
+    Time: O(n * k), Space: O(n*k)
+    
+    Use tuple of counts as signature.
+    """
+    def signature(word):
+        even_count = [0] * 26
+        odd_count = [0] * 26
+        
+        for i, char in enumerate(word):
+            if i % 2 == 0:
+                even_count[ord(char) - ord('a')] += 1
+            else:
+                odd_count[ord(char) - ord('a')] += 1
+        
+        return (tuple(even_count), tuple(odd_count))
+    
+    groups = set()
+    for word in words:
+        groups.add(signature(word))
+    
+    return len(groups)
+
+
 if __name__ == "__main__":
-    test1 = ["abcd", "cdab", "cbad", "xyzz", "zzxy", "zzyx"]
-    print(f"Test 1: {numSpecialEquivGroups(test1)}")  # Expected: 3
+    print("Testing Special Equivalent Groups:\n")
     
-    test2 = ["abc", "acb", "bac", "bca", "cab", "cba"]
-    print(f"Test 2: {numSpecialEquivGroups(test2)}")  # Expected: 3
+    tests = [
+        (["abcd","cdab","cbad","xyzz","zzxy","zzyx"], 3),
+        (["abc","acb","bac","bca","cab","cba"], 3),
+        (["a","b","c","a","c","c"], 3)
+    ]
     
-    test3 = ["a", "b", "c", "a", "c", "c"]
-    print(f"Test 3: {numSpecialEquivGroups(test3)}")  # Expected: 3
+    for words, expected in tests:
+        r1 = numSpecialEquivGroups(words)
+        r2 = numSpecialEquivGroups_count(words)
+        
+        print(f'{words}:')
+        print(f'  Sort={r1} Count={r2} (exp={expected}) {"" if r1 == expected else ""}\n')

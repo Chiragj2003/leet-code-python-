@@ -1,42 +1,107 @@
 """
-LeetCode #69 - Sqrt(x)
-Topic: Binary Search
-Difficulty: Easy
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    LeetCode #69 - Sqrt(x)                                     ║
+║                    Topic: Binary Search                                      ║
+║                    Difficulty: Easy                                           ║
+║                    Company: Amazon, Bloomberg, Adobe                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-PROBLEM EXPLANATION:
-Given a non-negative integer x, compute and return the square root of x.
-Return the integer part (floor value) of the square root.
-You cannot use built-in exponent or sqrt functions.
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🎯 QUESTION IN SIMPLE TERMS                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Example:
-Input: x = 4
-Output: 2
+WHAT'S THE PROBLEM?
+───────────────────
+Compute and return the square root of x (rounded down to nearest integer).
 
-Input: x = 8
-Output: 2
-Explanation: sqrt(8) = 2.828..., floor is 2
+EXAMPLES:
+─────────
+✓ Input: x = 4 → Output: 2
+✓ Input: x = 8 → Output: 2 (√8 ≈ 2.828, rounded down)
+✓ Input: x = 1 → Output: 1
 
-APPROACH (Binary Search):
-1. The square root of x is between 0 and x
-2. Use binary search to find the largest number whose square <= x
-3. Check if mid * mid <= x
-4. If yes, it could be answer; search right for larger values
-5. If no, search left for smaller values
+IMAGINE THIS (CHILD-FRIENDLY):
+──────────────────────────────
+🔢 Number game: What number times itself equals (or is close to) x?
+   8: Try 3×3=9 (too big), 2×2=4 (good!), answer is 2.
 
-Time Complexity: O(log n)
-Space Complexity: O(1)
+📦 Square tiles: You have 8 tiles. What's biggest square you can make?
+   2×2 = 4 tiles used. Answer: 2.
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ⭐ AMAZON STAR METHOD ANSWER                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📌 SITUATION:
+   Amazon graphics: Calculate image dimensions. Need integer
+   square root without using built-in functions.
+
+📌 TASK:
+   Compute floor(√x) without math.sqrt().
+   Time O(log x), Space O(1).
+
+📌 ACTION:
+   Binary search on answer range [0, x]:
+   1. Try mid as answer
+   2. Check if mid*mid ≤ x
+   3. Narrow search range
+
+📌 RESULT:
+   ✓ Time: O(log x) binary search
+   ✓ Space: O(1) constant
+   ✓ Accurate integer sqrt
+
 """
 
-def mySqrt(x):
+# ═══════════════════════════════════════════════════════════════════════════
+# 💡 BRUTE FORCE - Linear Search
+# ═══════════════════════════════════════════════════════════════════════════
+def mySqrt_bruteforce(x):
     """
-    Returns the integer square root of x
+    Try every number from 0 to x
+    
+    Time: O(√x) - check up to sqrt(x)
+    Space: O(1)
     """
     if x < 2:
         return x
     
-    left = 1
-    right = x // 2  # sqrt(x) is at most x/2 for x >= 2
-    result = 0
+    for i in range(x):
+        if i * i > x:
+            return i - 1
+    
+    return x
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🚀 OPTIMAL SOLUTION - Binary Search
+# ═══════════════════════════════════════════════════════════════════════════
+def mySqrt(x):
+    """
+    Binary search for sqrt
+    
+    Search range: [0, x]
+    
+    Example: x = 8
+    ────────
+    left=0, right=8, mid=4
+    4*4=16 > 8 → Too big, search left
+    
+    left=0, right=3, mid=1
+    1*1=1 < 8 → Too small, search right
+    
+    left=2, right=3, mid=2
+    2*2=4 < 8 → Too small, search right
+    
+    left=3, right=3, mid=3
+    3*3=9 > 8 → Too big, search left
+    
+    left=3, right=2 → Done! Return 2
+    """
+    if x < 2:
+        return x
+    
+    left, right = 0, x
     
     while left <= right:
         mid = (left + right) // 2
@@ -45,22 +110,68 @@ def mySqrt(x):
         if square == x:
             return mid
         elif square < x:
-            # mid could be answer, but check if larger value exists
-            result = mid
             left = mid + 1
         else:
-            # mid is too large
             right = mid - 1
     
-    return result
+    return right  # Return floor value
 
 
-# Test cases
+# ═══════════════════════════════════════════════════════════════════════════
+# 📚 ALTERNATIVE - Newton's Method
+# ═══════════════════════════════════════════════════════════════════════════
+def mySqrt_newton(x):
+    """
+    Newton-Raphson method for faster convergence
+    
+    Formula: x_new = (x_old + n/x_old) / 2
+    
+    Time: O(log x)
+    Space: O(1)
+    """
+    if x < 2:
+        return x
+    
+    # Start with x/2 as guess
+    guess = x
+    while guess * guess > x:
+        guess = (guess + x // guess) // 2
+    
+    return guess
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 📊 COMPLEXITY COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════
+"""
+╔════════════════╦════════════╦═══════════╦═════════════════════════╗
+║   Approach     ║    Time    ║   Space   ║       Notes             ║
+╠════════════════╬════════════╬═══════════╬═════════════════════════╣
+║ Brute Force    ║   O(√x)    ║   O(1)    ║ Linear search           ║
+║ Binary Search  ║  O(log x)  ║   O(1)    ║ Standard approach       ║
+║ Newton Method  ║  O(log x)  ║   O(1)    ║ Faster convergence      ║
+╚════════════════╩════════════╩═══════════╩═════════════════════════╝
+"""
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🧪 TEST CASES
+# ═══════════════════════════════════════════════════════════════════════════
+
 if __name__ == "__main__":
-    print(f"Test 1: {mySqrt(4)}")    # Expected: 2
-    print(f"Test 2: {mySqrt(8)}")    # Expected: 2
-    print(f"Test 3: {mySqrt(0)}")    # Expected: 0
-    print(f"Test 4: {mySqrt(1)}")    # Expected: 1
-    print(f"Test 5: {mySqrt(16)}")   # Expected: 4
-    print(f"Test 6: {mySqrt(15)}")   # Expected: 3
-    print(f"Test 7: {mySqrt(100)}")  # Expected: 10
+    test_cases = [4, 8, 1, 0, 16, 25, 26]
+    
+    print("=" * 70)
+    print("🧪 TESTING SQRT(X)")
+    print("=" * 70)
+    
+    for x in test_cases:
+        brute = mySqrt_bruteforce(x)
+        binary = mySqrt(x)
+        newton = mySqrt_newton(x)
+        
+        print(f"\nInput: x = {x}")
+        print(f"Brute Force: {brute}")
+        print(f"Binary Search: {binary}")
+        print(f"Newton: {newton}")
+        print(f"Verify: {binary}² = {binary*binary}, {binary+1}² = {(binary+1)*(binary+1)}")

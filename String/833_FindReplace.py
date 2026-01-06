@@ -1,54 +1,80 @@
-"""
-LeetCode #833 - Find and Replace in String
-Topic: String
-Difficulty: Medium
+﻿"""
 
-PROBLEM EXPLANATION:
-Given a string s and arrays indices, sources, and targets, perform replacements:
-- If sources[i] matches s starting at indices[i], replace with targets[i]
-- Process all replacements that don't overlap
+              LeetCode #833 - Find And Replace in String                      
+              Topic: String | Difficulty: Medium                              
+              Company: Amazon, Google                                         
+
+
+PROBLEM: Replace substrings at specific indices with new strings.
 
 Example:
-Input: s = "abcd", indices = [0,2], sources = ["a","cd"], targets = ["eee","ffff"]
-Output: "eeebffff"
-Explanation: "a" at index 0 -> "eee", "cd" at index 2 -> "ffff"
-
-APPROACH:
-1. Create list of (index, source, target) and sort by index (descending)
-2. Process from right to left to avoid index shifting
-3. For each replacement, check if source matches at index
-4. If yes, replace; otherwise skip
-
-Time Complexity: O(n log n + m) where m is total length
-Space Complexity: O(n)
+  s = "abcd", indices = [0,2], sources = ["a","cd"], targets = ["eee","ffff"]
+   "eeebffff"
 """
 
+#  SOLUTION 1: Sort and Replace Backwards (OPTIMAL)
 def findReplaceString(s, indices, sources, targets):
     """
-    Returns string after replacements
+    Sort by index descending, replace from right to left
+    Time: O(n log n + m), Space: O(m)
+    where n=len(indices), m=len(s)
+    
+    Replace backwards to avoid index shifting.
     """
-    # Combine and sort by index (descending to process right-to-left)
+    # Create list of (index, source, target)
     replacements = sorted(zip(indices, sources, targets), reverse=True)
     
-    # Convert string to list for easier manipulation
-    result = list(s)
+    s_list = list(s)
     
-    for index, source, target in replacements:
-        # Check if source matches at index
-        if s[index:index+len(source)] == source:
+    for idx, source, target in replacements:
+        # Check if source matches at idx
+        if s[idx:idx+len(source)] == source:
             # Replace
-            result[index:index+len(source)] = list(target)
+            s_list[idx:idx+len(source)] = list(target)
+    
+    return ''.join(s_list)
+
+
+#  SOLUTION 2: Mark and Build
+def findReplaceString_mark(s, indices, sources, targets):
+    """
+    Mark valid replacements, then build result
+    Time: O(n + m), Space: O(m)
+    
+    Two-pass approach.
+    """
+    # Mark replacements
+    replace_map = {}
+    for i, idx in enumerate(indices):
+        if s[idx:idx+len(sources[i])] == sources[i]:
+            replace_map[idx] = (len(sources[i]), targets[i])
+    
+    # Build result
+    result = []
+    i = 0
+    while i < len(s):
+        if i in replace_map:
+            skip_len, target = replace_map[i]
+            result.append(target)
+            i += skip_len
+        else:
+            result.append(s[i])
+            i += 1
     
     return ''.join(result)
 
 
-# Test cases
 if __name__ == "__main__":
-    test1 = findReplaceString("abcd", [0, 2], ["a", "cd"], ["eee", "ffff"])
-    print(f"Test 1: {test1}")  # Expected: "eeebffff"
+    print("Testing Find And Replace:\n")
     
-    test2 = findReplaceString("abcd", [0, 2], ["ab", "ec"], ["eee", "ffff"])
-    print(f"Test 2: {test2}")  # Expected: "eeecd"
+    tests = [
+        ("abcd", [0,2], ["a","cd"], ["eee","ffff"], "eeebffff"),
+        ("abcd", [0,2], ["ab","ec"], ["eee","ffff"], "eeecd")
+    ]
     
-    test3 = findReplaceString("vmokgggqzp", [3,5,1], ["kg","ggq","mo"], ["s","so","bfr"])
-    print(f"Test 3: {test3}")  # Expected: "vbfrssozp"
+    for s, indices, sources, targets, expected in tests:
+        r1 = findReplaceString(s, indices, sources, targets)
+        r2 = findReplaceString_mark(s, indices, sources, targets)
+        
+        print(f's="{s}": Sort={r1} Mark={r2}')
+        print(f'  Expected={expected} {"" if r1 == expected else ""}\n')

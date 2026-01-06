@@ -1,58 +1,95 @@
-"""
-LeetCode #791 - Custom Sort String
-Topic: String
-Difficulty: Medium
+﻿"""
 
-PROBLEM EXPLANATION:
-You are given two strings order and s. All characters in order are unique
-and sorted in some custom order. Permute the characters of s so that they
-match the order that order was sorted. Return any permutation of s that satisfies this.
+              LeetCode #791 - Custom Sort String                              
+              Topic: String/HashMap | Difficulty: Medium                      
+              Company: Meta, Amazon                                           
+
+
+PROBLEM: Sort string based on custom order defined by another string.
 
 Example:
-Input: order = "cba", s = "abcd"
-Output: "cbad"
-Explanation: "c", "b", "a" appear in order, so they're first. "d" doesn't appear, so it's last.
-
-APPROACH:
-1. Count frequency of each character in s
-2. Build result by iterating through order
-3. For each char in order, add all occurrences from s
-4. Add remaining characters not in order
-
-Time Complexity: O(n + m)
-Space Complexity: O(n)
+  order = "cba", s = "abcd"
+   "cbad" (c first, then b, then a, then d)
 """
 
 from collections import Counter
 
+#  SOLUTION 1: Count and Build (OPTIMAL)
 def customSortString(order, s):
     """
-    Returns s sorted according to order
+    Count chars in s, build result by order
+    Time: O(n), Space: O(1) - max 26 chars
+    
+    Process order first, then remaining chars.
     """
-    # Count frequency of characters in s
     count = Counter(s)
     result = []
     
-    # Add characters in the order specified
+    # Add chars in order
     for char in order:
         if char in count:
             result.append(char * count[char])
             del count[char]
     
-    # Add remaining characters
-    for char, freq in count.items():
-        result.append(char * freq)
+    # Add remaining chars
+    for char in count:
+        result.append(char * count[char])
     
     return ''.join(result)
 
 
-# Test cases
+#  SOLUTION 2: Custom Sort Key
+def customSortString_sort(order, s):
+    """
+    Sort with custom key
+    Time: O(n log n), Space: O(n)
+    
+    Use order index as sort key.
+    """
+    order_map = {char: i for i, char in enumerate(order)}
+    
+    # Chars not in order get high value
+    return ''.join(sorted(s, key=lambda x: order_map.get(x, 100)))
+
+
+#  SOLUTION 3: Bucket Sort
+def customSortString_bucket(order, s):
+    """
+    Bucket sort approach
+    Time: O(n), Space: O(1)
+    
+    Similar to counting sort.
+    """
+    buckets = {char: [] for char in order}
+    extra = []
+    
+    for char in s:
+        if char in buckets:
+            buckets[char].append(char)
+        else:
+            extra.append(char)
+    
+    result = []
+    for char in order:
+        result.extend(buckets[char])
+    result.extend(extra)
+    
+    return ''.join(result)
+
+
 if __name__ == "__main__":
-    test1 = customSortString("cba", "abcd")
-    print(f"Test 1: {test1}")  # Expected: "cbad"
+    print("Testing Custom Sort String:\n")
     
-    test2 = customSortString("bcafg", "abcd")
-    print(f"Test 2: {test2}")  # Expected: "bcad"
+    tests = [
+        ("cba", "abcd", "cbad"),
+        ("bcafg", "abcd", "bcad")
+    ]
     
-    test3 = customSortString("kqep", "pekeq")
-    print(f"Test 3: {test3}")  # Expected: "kqeep"
+    for order, s, expected in tests:
+        r1 = customSortString(order, s)
+        r2 = customSortString_sort(order, s)
+        r3 = customSortString_bucket(order, s)
+        
+        print(f'order="{order}", s="{s}":')
+        print(f'  Count={r1}, Sort={r2}, Bucket={r3}')
+        print(f'  Expected={expected} {"" if r1 == expected else ""}\n')

@@ -1,40 +1,77 @@
-"""
-LeetCode #1156 - Swap For Longest Repeated Character Substring
-Topic: String / Sliding Window
-Difficulty: Medium
+﻿"""
 
-PROBLEM EXPLANATION:
-Given a string, you can swap two characters at most once.
-Return the length of the longest substring with repeating characters.
+              LeetCode #1156 - Swap For Longest Repeated Character            
+              Topic: String/Sliding Window | Difficulty: Medium               
+              Company: Amazon                                                 
+
+
+PROBLEM: Find max length of substring with same char after at most 1 swap.
 
 Example:
-Input: text = "ababa"
-Output: 3
-Explanation: Swap first 'b' with last 'a': "aaaab" -> "aaa" = 3
-
-Input: text = "aaabbaaa"
-Output: 4
-Explanation: Swap middle 'b' with 'a': 4 consecutive 'a's
-
-APPROACH:
-1. For each character, find all blocks of that character
-2. Check if we can extend a block by swapping
-3. Can extend if: adjacent blocks with 1 different char between, or extra char available
-
-Time Complexity: O(n)
-Space Complexity: O(n)
+  "ababa"  3 (swap to get "aaaba" or "abaaa")
+  "aaabaaa"  6 (swap middle 'b' with external 'a')
 """
 
 from collections import Counter
 
+#  SOLUTION 1: Sliding Window with Counter (OPTIMAL)
 def maxRepOpt1(text):
     """
-    Returns length of longest repeating substring after one swap
-    """
-    # Count total occurrences of each character
-    count = Counter(text)
+    Sliding window for each character
+    Time: O(26*n) = O(n), Space: O(1)
     
-    # Group consecutive characters
+    For each char: find max window with at most 1 different char.
+    """
+    count = Counter(text)
+    max_len = 0
+    
+    for char in count:
+        # Try to form longest substring of 'char'
+        i = 0
+        while i < len(text):
+            if text[i] != char:
+                i += 1
+                continue
+            
+            # Found start of char sequence
+            j = i
+            diff_count = 0
+            diff_pos = -1
+            
+            while j < len(text):
+                if text[j] == char:
+                    j += 1
+                elif diff_count == 0:
+                    diff_count = 1
+                    diff_pos = j
+                    j += 1
+                else:
+                    break
+            
+            # Length of sequence
+            seq_len = j - i
+            char_count = seq_len - diff_count
+            
+            # Can we swap from outside?
+            if count[char] > char_count:
+                max_len = max(max_len, seq_len)
+            else:
+                max_len = max(max_len, seq_len - diff_count)
+            
+            i = diff_pos if diff_pos != -1 else j
+    
+    return max_len
+
+
+#  SOLUTION 2: Group Consecutive (Simpler)
+def maxRepOpt1_group(text):
+    """
+    Group consecutive same chars, check merge potential
+    Time: O(n), Space: O(n)
+    
+    If two groups of same char separated by 1 different char, can merge.
+    """
+    # Group consecutive chars
     groups = []
     i = 0
     while i < len(text):
@@ -44,31 +81,32 @@ def maxRepOpt1(text):
         groups.append((text[i], j - i))
         i = j
     
-    max_len = max(count.values())  # At least we can get this
+    count = Counter(text)
+    max_len = max(min(length + 1, count[char]) for char, length in groups)
     
-    # Check each group
-    for i in range(len(groups)):
-        char, length = groups[i]
-        
-        # Case 1: Extend current group by 1 if extra char available
-        if count[char] > length:
-            max_len = max(max_len, length + 1)
-        
-        # Case 2: Merge two groups separated by single different char
-        if i + 2 < len(groups) and groups[i+2][0] == char and groups[i+1][1] == 1:
-            total = groups[i][1] + groups[i+2][1]
-            # Can merge + 1 if extra char available
-            if count[char] > total:
-                max_len = max(max_len, total + 1)
-            else:
-                max_len = max(max_len, total)
+    # Check if can merge two groups
+    for i in range(len(groups) - 2):
+        if groups[i][0] == groups[i+2][0] and groups[i+1][1] == 1:
+            # Can merge groups[i] and groups[i+2]
+            merged = groups[i][1] + groups[i+2][1]
+            max_len = max(max_len, min(merged + 1, count[groups[i][0]]))
     
     return max_len
 
 
-# Test cases
 if __name__ == "__main__":
-    print(f"Test 1: {maxRepOpt1('ababa')}")  # Expected: 3
-    print(f"Test 2: {maxRepOpt1('aaabbaaa')}")  # Expected: 4
-    print(f"Test 3: {maxRepOpt1('aaaa')}")  # Expected: 4
-    print(f"Test 4: {maxRepOpt1('abcdef')}")  # Expected: 1
+    print("Testing Swap For Longest:\n")
+    
+    tests = [
+        ("ababa", 3),
+        ("aaabaaa", 6),
+        ("aaaa", 4),
+        ("aaaaa", 5),
+        ("abcdef", 1)
+    ]
+    
+    for text, expected in tests:
+        r1 = maxRepOpt1(text)
+        r2 = maxRepOpt1_group(text)
+        
+        print(f'"{text}": Window={r1} Group={r2} (exp={expected}) {"" if r1 == expected else ""}')

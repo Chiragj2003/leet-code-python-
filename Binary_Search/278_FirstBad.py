@@ -1,95 +1,169 @@
 """
-LeetCode #278 - First Bad Version
-Topic: Binary Search
-Difficulty: Easy
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    LeetCode #278 - First Bad Version                          ║
+║                    Topic: Binary Search                                      ║
+║                    Difficulty: Easy                                           ║
+║                    Company: Amazon, Meta, Google                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-PROBLEM EXPLANATION (Easy Terms):
-You're a developer and you have n versions: 1, 2, 3, ..., n
-One version is bad and all versions after it are also bad.
-Find the first bad version using minimum API calls!
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🎯 QUESTION IN SIMPLE TERMS                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Example:
-Input: n = 5, bad = 4
-Output: 4
-Explanation: Version 4 is first bad, versions 4 and 5 are bad
+WHAT'S THE PROBLEM?
+───────────────────
+You have n versions [1,2,3,...,n]. Find first bad version.
+All versions after bad version are also bad.
+Minimize calls to isBadVersion(version) API.
 
-WHY THIS WORKS (Simple Explanation):
-Use binary search!
-- If middle version is bad, first bad is at middle or before
-- If middle version is good, first bad is after middle
-- Keep narrowing down until we find the first bad version
+EXAMPLES:
+─────────
+✓ Input: n = 5, bad = 4
+  Versions: [good, good, good, bad, bad]
+  Output: 4
 
-Time Complexity: O(log n) - binary search
-Space Complexity: O(1) - only a few variables
+✓ Input: n = 1, bad = 1
+  Output: 1
+
+IMAGINE THIS (CHILD-FRIENDLY):
+──────────────────────────────
+🍪 Cookie batch: Made 100 cookies. At some point, recipe got bad.
+   Find first bad cookie. Can only taste each cookie once.
+   [good, good, good, BAD, bad, bad...]
+
+📚 Book printing: 1000 copies. Printer broke at some page.
+   Find first broken page efficiently.
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ⭐ AMAZON STAR METHOD ANSWER                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📌 SITUATION:
+   Amazon app versions: bug introduced in some version.
+   Find first bad version with minimal API calls.
+
+📌 TASK:
+   Find first bad version in [1, n].
+   Time O(log n), Space O(1).
+   Minimize isBadVersion() calls.
+
+📌 ACTION:
+   Binary search:
+   1. Check middle version
+   2. If bad, search left (including mid)
+   3. If good, search right
+
+📌 RESULT:
+   ✓ Time: O(log n) binary search
+   ✓ Space: O(1) constant
+   ✓ Minimal API calls (log n instead of n)
+
 """
 
-# This is the API provided (in actual problem, this is given)
+# ═══════════════════════════════════════════════════════════════════════════
+# 🔧 MOCK API (for testing)
+# ═══════════════════════════════════════════════════════════════════════════
+BAD_VERSION = 4  # Global variable for testing
+
 def isBadVersion(version):
-    """
-    Simulated API call to check if version is bad
-    In real problem, this function is provided
-    """
-    # For testing, let's say version 4 onwards is bad
-    return version >= 4
+    """Mock API that checks if version is bad"""
+    return version >= BAD_VERSION
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 💡 BRUTE FORCE - Linear Search
+# ═══════════════════════════════════════════════════════════════════════════
+def firstBadVersion_bruteforce(n):
+    """
+    Check each version sequentially
+    
+    Time: O(n) - check all versions
+    Space: O(1)
+    API Calls: O(n)
+    """
+    for i in range(1, n + 1):
+        if isBadVersion(i):
+            return i
+    return n
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🚀 OPTIMAL SOLUTION - Binary Search
+# ═══════════════════════════════════════════════════════════════════════════
 def firstBadVersion(n):
     """
-    Find first bad version using binary search
+    Binary search for first bad version
     
-    Think of it like:
-    - Versions: [Good, Good, Good, Bad, Bad, Bad]
-    - We want to find first Bad
-    - Use binary search: if mid is Bad, answer is mid or before
-    - If mid is Good, answer is after mid
+    Key: All versions after first bad are also bad.
+    This creates a sorted pattern: [False, False, True, True...]
+    
+    Example: n = 5, bad = 4
+    ────────
+    Versions: [1, 2, 3, 4, 5]
+    Status:   [G, G, G, B, B]
+    
+    left=1, right=5, mid=3
+    isBadVersion(3)=False → Search right
+    
+    left=4, right=5, mid=4
+    isBadVersion(4)=True → Search left (keep mid)
+    
+    left=4, right=4 → Found! Return 4
     """
-    left = 1
-    right = n
+    left, right = 1, n
     
     while left < right:
         mid = left + (right - left) // 2  # Avoid overflow
         
         if isBadVersion(mid):
-            # Mid is bad, so first bad is at mid or before
+            # Mid is bad, first bad might be mid or earlier
             right = mid
         else:
-            # Mid is good, so first bad is after mid
+            # Mid is good, first bad is after mid
             left = mid + 1
     
-    # When left == right, we found the first bad version
     return left
 
 
-# Alternative approach with clearer logic
-def firstBadVersion_v2(n):
-    """
-    Same logic, different style
-    """
-    left = 1
-    right = n
-    result = n  # Initialize with last version
-    
-    while left <= right:
-        mid = left + (right - left) // 2
-        
-        if isBadVersion(mid):
-            result = mid  # This could be the answer
-            right = mid - 1  # But check if there's an earlier bad version
-        else:
-            left = mid + 1  # First bad is definitely after mid
-    
-    return result
+# ═══════════════════════════════════════════════════════════════════════════
+# 📊 COMPLEXITY COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════
+"""
+╔════════════════╦════════════╦═══════════╦═════════════════════════╗
+║   Approach     ║    Time    ║   Space   ║     API Calls           ║
+╠════════════════╬════════════╬═══════════╬═════════════════════════╣
+║ Brute Force    ║   O(n)     ║   O(1)    ║ O(n) worst case         ║
+║ Binary Search  ║  O(log n)  ║   O(1)    ║ O(log n) - optimal      ║
+╚════════════════╩════════════╩═══════════╩═════════════════════════╝
+
+For n = 1,000,000:
+- Brute Force: up to 1,000,000 calls
+- Binary Search: ~20 calls
+"""
 
 
-# Test cases with explanations
+# ═══════════════════════════════════════════════════════════════════════════
+# 🧪 TEST CASES
+# ═══════════════════════════════════════════════════════════════════════════
+
 if __name__ == "__main__":
-    # Note: For testing, we've set bad version to 4 in isBadVersion
+    test_cases = [
+        (5, 4),   # bad at 4
+        (1, 1),   # bad at 1
+        (10, 6),  # bad at 6
+    ]
     
-    print(f"Test 1: {firstBadVersion(5)}")
-    # Expected: 4 - versions 4 and 5 are bad
+    print("=" * 70)
+    print("🧪 TESTING FIRST BAD VERSION")
+    print("=" * 70)
     
-    print(f"Test 2: {firstBadVersion(1)}")
-    # Expected: 1 - only one version
-    
-    print(f"Test 3: {firstBadVersion(10)}")
-    # Expected: 4 - with our test setup
+    for n, bad in test_cases:
+        # Set global bad version for testing
+        BAD_VERSION = bad
+        
+        result_brute = firstBadVersion_bruteforce(n)
+        result_optimal = firstBadVersion(n)
+        
+        print(f"\nInput: n = {n}, first bad = {bad}")
+        print(f"Brute Force: {result_brute} {'✓' if result_brute == bad else '✗'}")
+        print(f"Binary Search: {result_optimal} {'✓' if result_optimal == bad else '✗'}")

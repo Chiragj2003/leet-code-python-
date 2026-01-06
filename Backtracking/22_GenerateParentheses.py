@@ -1,51 +1,144 @@
 """
-LeetCode #22 - Generate Parentheses
-Topic: Backtracking
-Difficulty: Medium
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    LeetCode #22 - Generate Parentheses                        ║
+║                    Topic: Backtracking                                       ║
+║                    Difficulty: Medium                                         ║
+║                    Company: Amazon, Meta, Google                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-PROBLEM EXPLANATION (Easy Terms):
-Generate all valid combinations of n pairs of parentheses.
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🎯 QUESTION IN SIMPLE TERMS                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Example:
-n=3 -> ["((()))","(()())","(())()","()(())","()()()"]
+WHAT'S THE PROBLEM?
+───────────────────
+Given n pairs of parentheses, generate ALL valid combinations.
 
-Think of it like:
-All ways to properly nest n pairs of brackets!
+EXAMPLES:
+─────────
+✓ Input: n = 3  → Output: ["((()))","(()())","(())()","()(())","()()()"]
+✓ Input: n = 1  → Output: ["()"]
 
-WHY THIS WORKS (Simple Explanation):
-At each step:
-- Can add '(' if we haven't used all n
-- Can add ')' if it won't make invalid (more ')' than '(')
+IMAGINE THIS (CHILD-FRIENDLY):
+──────────────────────────────
+🔓 Opening and closing doors:
+   - You have 3 doors
+   - Must open before you can close
+   - Open all, then close all: ((()))
+   - Mix it up: ()()()
 
-Backtrack to try all valid combinations!
+🎨 Brackets: Think of them as hugs!
+   ( = start hug, ) = end hug
+   Can't end before you start!
 
-Time: O(4^n / sqrt(n)) - Catalan number
-Space: O(n) for recursion
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ⭐ AMAZON STAR METHOD ANSWER                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📌 SITUATION:
+   Amazon JSON validation: generate all valid bracket patterns
+   for testing parser edge cases.
+
+📌 TASK:
+   Generate all valid n-pair parentheses.
+   Time O(4^n / √n), Space O(n).
+
+📌 ACTION:
+   Backtracking with rules:
+   1. Add '(' if open < n
+   2. Add ')' if close < open
+
+📌 RESULT:
+   ✓ Time: O(4^n / √n) - Catalan number
+   ✓ Space: O(n) recursion
+   ✓ All valid patterns generated
+
 """
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 🚀 OPTIMAL SOLUTION - Backtracking
+# ═══════════════════════════════════════════════════════════════════════════
 def generateParenthesis(n):
-    """Generate all valid parentheses combinations"""
+    """
+    Backtracking with open/close counters
+    
+    Rules:
+    1. Add '(' if open < n
+    2. Add ')' if close < open
+    
+    Example: n = 2
+    ───────
+                    ""
+                 /      
+               "("       
+             /    \\
+          "(("    "()"
+           |       |
+        "(())"  "()()"
+    """
     result = []
     
-    def backtrack(current, open_count, close_count):
-        if len(current) == 2 * n:
-            result.append(current)
+    def backtrack(path, open_count, close_count):
+        # Base case: complete
+        if len(path) == 2 * n:
+            result.append(path)
             return
         
-        # Can add '(' if haven't used all
+        # Add '(' if we can
         if open_count < n:
-            backtrack(current + '(', open_count + 1, close_count)
+            backtrack(path + '(', open_count + 1, close_count)
         
-        # Can add ')' if won't make invalid
+        # Add ')' if valid
         if close_count < open_count:
-            backtrack(current + ')', open_count, close_count + 1)
+            backtrack(path + ')', open_count, close_count + 1)
     
     backtrack('', 0, 0)
     return result
 
 
-# Test
+# ═══════════════════════════════════════════════════════════════════════════
+# 📚 ALTERNATIVE - Iterative DP
+# ═══════════════════════════════════════════════════════════════════════════
+def generateParenthesis_dp(n):
+    """
+    Dynamic programming approach
+    
+    dp[0] = [""]
+    dp[1] = ["()"]
+    dp[2] = ["(())", "()()"]
+    """
+    if n == 0:
+        return [""]
+    
+    dp = [[] for _ in range(n + 1)]
+    dp[0] = [""]
+    
+    for i in range(1, n + 1):
+        for j in range(i):
+            # ( left ) right
+            for left in dp[j]:
+                for right in dp[i - 1 - j]:
+                    dp[i].append(f"({left}){right}")
+    
+    return dp[n]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🧪 TEST CASES
+# ═══════════════════════════════════════════════════════════════════════════
+
 if __name__ == "__main__":
-    for n in [1, 2, 3]:
-        result = generateParenthesis(n)
-        print(f"n={n}: {result}")
+    test_cases = [1, 2, 3]
+    
+    print("=" * 70)
+    print("🧪 TESTING GENERATE PARENTHESES")
+    print("=" * 70)
+    
+    for n in test_cases:
+        result1 = generateParenthesis(n)
+        result2 = generateParenthesis_dp(n)
+        
+        print(f"\nInput: n = {n}")
+        print(f"Count: {len(result1)} combinations")
+        print(f"Backtrack: {result1}")
+        print(f"DP: {result2}")

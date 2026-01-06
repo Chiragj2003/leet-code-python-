@@ -1,98 +1,207 @@
 """
-LeetCode #34 - Find First and Last Position of Element in Sorted Array
-Topic: Binary Search
-Difficulty: Medium
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    LeetCode #34 - Find First and Last Position                ║
+║                    Topic: Binary Search                                      ║
+║                    Difficulty: Medium                                         ║
+║                    Company: Amazon, Meta, Google                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-PROBLEM EXPLANATION (Easy Terms):
-In a sorted array, find where a target number first appears and where it last appears.
-Like finding the first and last page where a word appears in a dictionary!
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🎯 QUESTION IN SIMPLE TERMS                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Example:
-Input: nums = [5,7,7,8,8,10], target = 8
-Output: [3,4]
-Explanation: 8 appears at index 3 and 4
+WHAT'S THE PROBLEM?
+───────────────────
+Given sorted array, find starting and ending position of target.
+If target not found, return [-1, -1].
+Must run in O(log n).
 
-WHY THIS WORKS (Simple Explanation):
-Use binary search twice:
-1. First search: find leftmost occurrence (first position)
-2. Second search: find rightmost occurrence (last position)
+EXAMPLES:
+─────────
+✓ Input: nums = [5,7,7,8,8,10], target = 8 → Output: [3,4]
+✓ Input: nums = [5,7,7,8,8,10], target = 6 → Output: [-1,-1]
+✓ Input: nums = [], target = 0 → Output: [-1,-1]
 
-For leftmost: when we find target, keep searching left
-For rightmost: when we find target, keep searching right
+IMAGINE THIS (CHILD-FRIENDLY):
+──────────────────────────────
+📚 Library: Books sorted by ID. Find first and last book with ID "007".
+   Books: [001, 005, 007, 007, 007, 010]
+   First 007 at position 2, last at position 4.
 
-Time Complexity: O(log n) - two binary searches
-Space Complexity: O(1) - only a few variables
+🎯 Archery scores: [5,7,7,8,8,10]. Find range where score is 8.
+   Starts at index 3, ends at index 4.
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ⭐ AMAZON STAR METHOD ANSWER                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📌 SITUATION:
+   Amazon inventory: sorted product IDs with duplicates.
+   Find all occurrences efficiently.
+
+📌 TASK:
+   Find first and last positions of target.
+   Time O(log n), Space O(1).
+
+📌 ACTION:
+   Two binary searches:
+   1. Find leftmost (first) occurrence
+   2. Find rightmost (last) occurrence
+
+📌 RESULT:
+   ✓ Time: O(log n) - two binary searches
+   ✓ Space: O(1) constant
+   ✓ Efficient range finding
+
 """
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 💡 BRUTE FORCE - Linear Scan
+# ═══════════════════════════════════════════════════════════════════════════
+def searchRange_bruteforce(nums, target):
+    """
+    Scan array to find first and last
+    
+    Time: O(n)
+    Space: O(1)
+    """
+    if not nums:
+        return [-1, -1]
+    
+    first = last = -1
+    
+    for i in range(len(nums)):
+        if nums[i] == target:
+            if first == -1:
+                first = i
+            last = i
+    
+    return [first, last]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🚀 OPTIMAL SOLUTION - Two Binary Searches
+# ═══════════════════════════════════════════════════════════════════════════
 def searchRange(nums, target):
     """
-    Find first and last position of target in sorted array
+    Binary search for left and right boundaries
     
-    Think of it like:
-    - Use binary search to find ANY occurrence
-    - Then use binary search again to find the boundaries
-    - Or better: search for leftmost and rightmost separately
+    Example: [5,7,7,8,8,10], target = 8
+    ────────
+    Find leftmost 8:
+    left=0, right=5, mid=2, nums[2]=7 < 8 → search right
+    left=3, right=5, mid=4, nums[4]=8 == 8 → continue left (might be earlier)
+    left=3, right=3, nums[3]=8 → Found leftmost = 3
+    
+    Find rightmost 8:
+    left=0, right=5, mid=2, nums[2]=7 < 8 → search right
+    left=3, right=5, mid=4, nums[4]=8 == 8 → continue right (might be later)
+    left=5, right=5, nums[5]=10 > 8 → Found rightmost = 4
     """
-    
-    def find_leftmost(nums, target):
-        """Find first occurrence of target"""
+    def findBound(isLeft):
         left, right = 0, len(nums) - 1
-        result = -1
+        bound = -1
         
         while left <= right:
             mid = (left + right) // 2
             
             if nums[mid] == target:
-                result = mid  # Found it, but keep searching left
-                right = mid - 1  # Search left side
+                bound = mid
+                # Continue searching
+                if isLeft:
+                    right = mid - 1  # Look left for earlier occurrence
+                else:
+                    left = mid + 1   # Look right for later occurrence
             elif nums[mid] < target:
                 left = mid + 1
             else:
                 right = mid - 1
         
-        return result
+        return bound
     
-    def find_rightmost(nums, target):
-        """Find last occurrence of target"""
-        left, right = 0, len(nums) - 1
-        result = -1
-        
-        while left <= right:
-            mid = (left + right) // 2
-            
-            if nums[mid] == target:
-                result = mid  # Found it, but keep searching right
-                left = mid + 1  # Search right side
-            elif nums[mid] < target:
-                left = mid + 1
-            else:
-                right = mid - 1
-        
-        return result
+    if not nums:
+        return [-1, -1]
     
-    # Find both boundaries
-    left_pos = find_leftmost(nums, target)
-    if left_pos == -1:
-        return [-1, -1]  # Target not found
+    leftBound = findBound(True)
+    if leftBound == -1:
+        return [-1, -1]
     
-    right_pos = find_rightmost(nums, target)
-    return [left_pos, right_pos]
+    rightBound = findBound(False)
+    
+    return [leftBound, rightBound]
 
 
-# Test cases with explanations
+# ═══════════════════════════════════════════════════════════════════════════
+# 📚 ALTERNATIVE - Single Pass with Expansion
+# ═══════════════════════════════════════════════════════════════════════════
+def searchRange_expand(nums, target):
+    """
+    Binary search + linear expansion
+    
+    Time: O(log n + k) where k is count of target
+    Space: O(1)
+    """
+    if not nums:
+        return [-1, -1]
+    
+    # Find any occurrence
+    left, right = 0, len(nums) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        if nums[mid] == target:
+            # Expand left and right
+            first = last = mid
+            while first > 0 and nums[first - 1] == target:
+                first -= 1
+            while last < len(nums) - 1 and nums[last + 1] == target:
+                last += 1
+            return [first, last]
+        elif nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    
+    return [-1, -1]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 📊 COMPLEXITY COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════
+"""
+╔════════════════╦════════════╦═══════════╦═════════════════════════╗
+║   Approach     ║    Time    ║   Space   ║       Notes             ║
+╠════════════════╬════════════╬═══════════╬═════════════════════════╣
+║ Brute Force    ║   O(n)     ║   O(1)    ║ Linear scan             ║
+║ Two Binary     ║  O(log n)  ║   O(1)    ║ Optimal solution        ║
+║ Binary+Expand  ║ O(log n+k) ║   O(1)    ║ k = target count        ║
+╚════════════════╩════════════╩═══════════╩═════════════════════════╝
+"""
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🧪 TEST CASES
+# ═══════════════════════════════════════════════════════════════════════════
+
 if __name__ == "__main__":
-    test1 = [5, 7, 7, 8, 8, 10]
-    print(f"Test 1: {searchRange(test1, 8)}")
-    # Expected: [3, 4] - 8 appears at indices 3 and 4
+    test_cases = [
+        ([5, 7, 7, 8, 8, 10], 8, [3, 4]),
+        ([5, 7, 7, 8, 8, 10], 6, [-1, -1]),
+        ([], 0, [-1, -1]),
+        ([1], 1, [0, 0]),
+    ]
     
-    test2 = [5, 7, 7, 8, 8, 10]
-    print(f"Test 2: {searchRange(test2, 6)}")
-    # Expected: [-1, -1] - 6 not in array
+    print("=" * 70)
+    print("🧪 TESTING FIND FIRST AND LAST POSITION")
+    print("=" * 70)
     
-    test3 = []
-    print(f"Test 3: {searchRange(test3, 0)}")
-    # Expected: [-1, -1] - empty array
-    
-    test4 = [1]
-    print(f"Test 4: {searchRange(test4, 1)}")
-    # Expected: [0, 0] - single element
+    for nums, target, expected in test_cases:
+        brute = searchRange_bruteforce(nums, target)
+        optimal = searchRange(nums, target)
+        expand = searchRange_expand(nums, target)
+        
+        print(f"\nInput: nums = {nums}, target = {target}")
+        print(f"Expected: {expected}")
+        print(f"Brute: {brute} {'✓' if brute == expected else '✗'}")
+        print(f"Binary: {optimal} {'✓' if optimal == expected else '✗'}")
+        print(f"Expand: {expand} {'✓' if expand == expected else '✗'}")

@@ -1,48 +1,41 @@
-"""
-LeetCode #435 - Non-overlapping Intervals
-Topic: Greedy / Intervals
-Difficulty: Medium
-
-PROBLEM EXPLANATION (Easy Terms):
-Remove minimum intervals to make rest non-overlapping.
-
-Example:
-[[1,2],[2,3],[3,4],[1,3]] -> 1 (remove [1,3])
-
-Think of it like:
-Scheduling maximum meetings without conflicts!
-
-WHY THIS WORKS:
-Sort by end time, greedily pick non-overlapping.
-
-Time: O(n log n)
-Space: O(1)
-"""
+﻿"""LeetCode #435 - Non-overlapping Intervals | Greedy | Medium"""
 
 def eraseOverlapIntervals(intervals):
-    """Minimum intervals to remove"""
+    """ OPTIMAL - Greedy Sort by End: O(n log n) time, O(1) space"""
     if not intervals:
         return 0
     
-    # Sort by end time
     intervals.sort(key=lambda x: x[1])
-    
-    end = intervals[0][1]
     count = 0
+    end = intervals[0][1]
     
     for i in range(1, len(intervals)):
         if intervals[i][0] < end:
-            # Overlapping, remove this interval
             count += 1
         else:
-            # Non-overlapping, update end
             end = intervals[i][1]
     
     return count
 
+def eraseOverlapIntervals_dp(intervals):
+    """ SOLUTION 2 - DP: O(n) time, O(n) space"""
+    if not intervals:
+        return 0
+    
+    intervals.sort(key=lambda x: x[0])
+    n = len(intervals)
+    dp = [1] * n
+    
+    for i in range(1, n):
+        for j in range(i):
+            if intervals[j][1] <= intervals[i][0]:
+                dp[i] = max(dp[i], dp[j] + 1)
+    
+    return n - max(dp)
 
-# Test
 if __name__ == "__main__":
-    intervals = [[1,2],[2,3],[3,4],[1,3]]
-    result = eraseOverlapIntervals(intervals)
-    print(f"Remove {result} intervals")
+    tests = [([[1,2],[2,3],[3,4],[1,3]], 1), ([[1,2],[1,2],[1,2]], 2)]
+    print("Testing Non-overlapping Intervals:")
+    for intervals, exp in tests:
+        r1, r2 = eraseOverlapIntervals(intervals[:]), eraseOverlapIntervals_dp(intervals[:])
+        print(f"{intervals}: Greedy={r1} DP={r2} (exp={exp})")

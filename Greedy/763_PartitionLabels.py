@@ -1,46 +1,45 @@
-"""
-LeetCode #763 - Partition Labels
-Topic: Greedy / String
-Difficulty: Medium
-
-PROBLEM EXPLANATION (Easy Terms):
-Partition string so each letter appears in at most one part.
-Maximize number of parts.
-
-Example:
-"ababcbacadefegdehijhklij" -> [9,7,8]
-("ababcbaca", "defegde", "hijhklij")
-
-Think of it like:
-Splitting string into independent segments!
-
-WHY THIS WORKS:
-Track last occurrence of each character.
-Extend partition to include all occurrences.
-
-Time: O(n)
-Space: O(1) - at most 26 letters
-"""
+﻿"""LeetCode #763 - Partition Labels | Greedy/String | Medium"""
 
 def partitionLabels(s):
-    """Partition string into max parts"""
+    """ OPTIMAL - Greedy with Last Index: O(n) time, O(1) space"""
     last = {c: i for i, c in enumerate(s)}
-    
-    partitions = []
+    result = []
     start = end = 0
     
     for i, c in enumerate(s):
         end = max(end, last[c])
-        
         if i == end:
-            partitions.append(end - start + 1)
+            result.append(end - start + 1)
             start = i + 1
     
-    return partitions
+    return result
 
+def partitionLabels_intervals(s):
+    """ SOLUTION 2 - Merge Intervals: O(n) time, O(n) space"""
+    last = {}
+    for i, c in enumerate(s):
+        if c not in last:
+            last[c] = [i, i]
+        else:
+            last[c][1] = i
+    
+    intervals = sorted(last.values())
+    result = []
+    start, end = intervals[0]
+    
+    for i in range(1, len(intervals)):
+        if intervals[i][0] <= end:
+            end = max(end, intervals[i][1])
+        else:
+            result.append(end - start + 1)
+            start, end = intervals[i]
+    
+    result.append(end - start + 1)
+    return result
 
-# Test
 if __name__ == "__main__":
-    s = "ababcbacadefegdehijhklij"
-    result = partitionLabels(s)
-    print(f'"{s}" -> {result}')
+    tests = [("ababcbacadefegdehijhklij", [9,7,8]), ("eccbbbbdec", [10])]
+    print("Testing Partition Labels:")
+    for s, exp in tests:
+        r1, r2 = partitionLabels(s), partitionLabels_intervals(s)
+        print(f"{s}: Greedy={r1} Intervals={r2} (exp={exp})")

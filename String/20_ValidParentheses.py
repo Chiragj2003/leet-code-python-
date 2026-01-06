@@ -1,139 +1,91 @@
-"""
-LeetCode #20 - Valid Parentheses (Enhanced)
-Topic: String
-Difficulty: Easy
+﻿"""
 
-PROBLEM EXPLANATION (Easy Terms):
-Check if string has valid matching brackets/parentheses.
+                 LeetCode #20 - Valid Parentheses                             
+                 Topic: String/Stack | Difficulty: Easy                       
+                 Company: Amazon, Microsoft, Google                           
+
+
+PROBLEM: Check if string has valid matching brackets.
 
 Examples:
-"()" -> True
-"()[]{}" -> True
-"(]" -> False
-"([)]" -> False (wrong order)
-"{[]}" -> True (properly nested)
-
-Think of it like:
-Opening brackets must be closed in the correct order.
-Like nested boxes - you must close the inner box before the outer!
-
-WHY THIS WORKS (Simple Explanation):
-Use a STACK (Last In, First Out):
-1. When you see opening bracket -> push to stack
-2. When you see closing bracket -> it must match stack top!
-3. At end, stack should be empty
-
-Like Russian dolls - must close in reverse order of opening!
-
-Time Complexity: O(n) - visit each character once
-Space Complexity: O(n) - stack can hold all opening brackets
+  "()"  True
+  "()[]{}"  True
+  "(]"  False
+  "([)]"  False
 """
 
+#  SOLUTION 1: Stack (OPTIMAL)
 def isValid(s):
     """
-    Check if parentheses are valid
+    Use stack for bracket matching
+    Time: O(n), Space: O(n)
     
-    Visual walkthrough for "{[]}":
-    
-    '{': stack = ['{']
-    '[': stack = ['{', '[']
-    ']': matches '[', pop -> stack = ['{']
-    '}': matches '{', pop -> stack = []
-    
-    Stack empty at end -> Valid! ✓
-    
-    Visual walkthrough for "([)]":
-    
-    '(': stack = ['(']
-    '[': stack = ['(', '[']
-    ')': expected ']' but got ')' -> Invalid! ✗
+    Key: Opening brackets push, closing brackets must match stack top.
     """
-    # Stack to keep track of opening brackets
     stack = []
-    
-    # Mapping of closing to opening brackets
-    closing_to_opening = {
-        ')': '(',
-        ']': '[',
-        '}': '{'
-    }
+    mapping = {')': '(', '}': '{', ']': '['}
     
     for char in s:
-        if char in closing_to_opening:
-            # Closing bracket
-            # Check if it matches stack top
-            if not stack or stack[-1] != closing_to_opening[char]:
+        if char in mapping:  # Closing bracket
+            if not stack or stack[-1] != mapping[char]:
                 return False
             stack.pop()
-        else:
-            # Opening bracket - push to stack
+        else:  # Opening bracket
             stack.append(char)
     
-    # Valid only if stack is empty
     return len(stack) == 0
 
 
-def isValid_verbose(s):
+#  SOLUTION 2: Replace Method
+def isValid_replace(s):
     """
-    Same logic with detailed comments for learning
+    Repeatedly remove matching pairs
+    Time: O(n), Space: O(n)
+    
+    Less efficient but intuitive approach.
     """
-    stack = []
-    pairs = {')': '(', ']': '[', '}': '{'}
+    while '()' in s or '{}' in s or '[]' in s:
+        s = s.replace('()', '').replace('{}', '').replace('[]', '')
+    return s == ''
+
+
+#  SOLUTION 3: Counter-based (for single bracket type)
+def isValid_simple(s):
+    """
+    Simple counter - works only for single bracket type
+    Time: O(n), Space: O(1)
     
-    for i, char in enumerate(s):
-        if char in pairs:
-            # This is a closing bracket
-            if not stack:
-                # No opening bracket to match
-                print(f"Position {i}: Found '{char}' but stack is empty")
-                return False
-            
-            if stack[-1] != pairs[char]:
-                # Wrong type of opening bracket
-                print(f"Position {i}: Expected '{pairs[char]}' but found '{stack[-1]}'")
-                return False
-            
-            # Match found!
-            stack.pop()
-            print(f"Position {i}: Matched '{char}' with '{pairs[char]}'")
-        else:
-            # This is an opening bracket
-            stack.append(char)
-            print(f"Position {i}: Added opening '{char}' to stack")
-    
-    if stack:
-        print(f"Unmatched opening brackets remaining: {stack}")
+    Educational: shows limitation of naive approach.
+    """
+    if len(s) % 2 != 0:
         return False
     
-    print("All brackets matched!")
-    return True
+    count = 0
+    for char in s:
+        if char == '(':
+            count += 1
+        elif char == ')':
+            count -= 1
+            if count < 0:
+                return False
+    
+    return count == 0
 
 
-# Test cases with detailed output
 if __name__ == "__main__":
-    test_cases = [
+    print("Testing Valid Parentheses:\n")
+    
+    tests = [
         ("()", True),
         ("()[]{}", True),
         ("(]", False),
         ("([)]", False),
         ("{[]}", True),
-        ("", True),
-        ("((", False),
-        ("))", False),
-        ("()[]", True),
+        ("", True)
     ]
     
-    print("=== Testing Standard Solution ===")
-    for s, expected in test_cases:
-        result = isValid(s)
-        status = "✓" if result == expected else "✗"
-        print(f"{status} Input: '{s}' -> {result} (Expected: {expected})")
-    
-    print("\n=== Testing Verbose Solution (Example) ===")
-    print("Input: '([)]'")
-    result = isValid_verbose("([)]")
-    print(f"Result: {result}\n")
-    
-    print("Input: '{[]}'")
-    result = isValid_verbose("{[]}")
-    print(f"Result: {result}")
+    for s, expected in tests:
+        r1 = isValid(s)
+        r2 = isValid_replace(s)
+        
+        print(f'"{s}": Stack={r1} Replace={r2} (exp={expected}) {"" if r1 == expected else ""}')

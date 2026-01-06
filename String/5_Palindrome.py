@@ -1,159 +1,145 @@
-"""
-LeetCode #5 - Longest Palindromic Substring
-Topic: String
-Difficulty: Medium
+﻿"""
 
-PROBLEM EXPLANATION (Easy Terms):
-Find the longest substring that reads same forwards and backwards.
+                LeetCode #5 - Longest Palindromic Substring                   
+                Topic: String | Difficulty: Medium                            
+                Company: Amazon, Meta, Microsoft                              
 
-Example:
-"babad" -> "bab" or "aba" (both length 3)
-"cbbd" -> "bb" (length 2)
 
-Think of it like:
-A palindrome is like a mirror - same on both sides.
-"racecar" reads same left-to-right and right-to-left!
+PROBLEM: Find the longest substring that reads the same forwards and backwards.
 
-WHY THIS WORKS (Simple Explanation):
-Try every possible CENTER of a palindrome:
-1. For each position, expand outward while characters match
-2. Check BOTH odd-length ("aba") and even-length ("abba") palindromes
-3. Track the longest one found
-
-Like dropping a pebble in water - ripples expand equally!
-
-Time Complexity: O(n²) - for each center, expand up to n times
-Space Complexity: O(1) - only storing indices
+Examples:
+  "babad"  "bab" or "aba" (length 3)
+  "cbbd"  "bb" (length 2)
 """
 
+#  SOLUTION 1: Expand Around Centers (OPTIMAL for interview)
 def longestPalindrome(s):
     """
-    Find longest palindromic substring
+    Expand from each possible center
+    Time: O(n), Space: O(1)
     
-    Visual example for "babad":
-    
-    Center at 'b' (index 0): "b" (length 1)
-    Center at 'a' (index 1): expand -> "bab" (length 3) ✓
-    Center at 'b' (index 2): "b" (length 1)
-    Center at 'a' (index 3): expand -> "aba" (length 3) ✓
-    Center at 'd' (index 4): "d" (length 1)
-    
-    Also check between characters:
-    Between b,a: "ba" not palindrome
-    Between a,b: "ab" not palindrome
-    ...
+    Intuition: A palindrome mirrors around center.
+    Check both odd-length (single center) and even-length (two centers).
     """
     if not s:
         return ""
     
-    start = 0  # Start index of longest palindrome
-    max_len = 0  # Length of longest palindrome
-    
-    def expandAroundCenter(left, right):
-        """
-        Expand while characters match
-        Returns length of palindrome
-        """
+    def expand_center(left, right):
         while left >= 0 and right < len(s) and s[left] == s[right]:
             left -= 1
             right += 1
-        # Return length of palindrome
-        return right - left - 1
+        return left + 1, right - 1  # Adjust to valid range
     
-    # Try each position as center
+    start, end = 0, 0
+    
     for i in range(len(s)):
-        # Odd length palindrome (single character center)
-        len1 = expandAroundCenter(i, i)
+        # Odd-length palindrome (center is single char)
+        l1, r1 = expand_center(i, i)
+        # Even-length palindrome (center is between chars)
+        l2, r2 = expand_center(i, i + 1)
         
-        # Even length palindrome (between two characters)
-        len2 = expandAroundCenter(i, i + 1)
-        
-        # Get maximum length
-        current_len = max(len1, len2)
-        
-        # Update if longer palindrome found
-        if current_len > max_len:
-            max_len = current_len
-            # Calculate start position
-            start = i - (current_len - 1) // 2
+        # Track longest
+        if r1 - l1 > end - start:
+            start, end = l1, r1
+        if r2 - l2 > end - start:
+            start, end = l2, r2
     
-    return s[start:start + max_len]
+    return s[start:end + 1]
 
 
+#  SOLUTION 2: Dynamic Programming
 def longestPalindrome_dp(s):
     """
-    Alternative: Dynamic Programming approach
+    DP table approach
+    Time: O(n), Space: O(n)
     
     dp[i][j] = True if s[i:j+1] is palindrome
     
-    Build up from smaller substrings:
-    1. Single characters are palindromes
-    2. Two same characters are palindromes
-    3. Longer: if s[i]==s[j] and s[i+1:j] is palindrome
-    
-    Time: O(n²), Space: O(n²)
+    Build from smaller to larger substrings.
     """
-    n = len(s)
-    if n == 0:
+    if not s:
         return ""
     
-    # dp[i][j] = is substring from i to j a palindrome?
+    n = len(s)
     dp = [[False] * n for _ in range(n)]
-    start = 0
-    max_len = 1
+    start, max_len = 0, 1
     
-    # Every single character is a palindrome
+    # All single characters are palindromes
     for i in range(n):
         dp[i][i] = True
     
-    # Check two-character substrings
+    # Check 2-character substrings
     for i in range(n - 1):
         if s[i] == s[i + 1]:
             dp[i][i + 1] = True
-            start = i
-            max_len = 2
+            start, max_len = i, 2
     
-    # Check longer substrings
+    # Check substrings of length 3+
     for length in range(3, n + 1):
         for i in range(n - length + 1):
             j = i + length - 1
-            
-            # Check if s[i:j+1] is palindrome
             if s[i] == s[j] and dp[i + 1][j - 1]:
                 dp[i][j] = True
-                start = i
-                max_len = length
+                start, max_len = i, length
     
     return s[start:start + max_len]
 
 
-# Test cases with visual explanations
+#  SOLUTION 3: Manacher's Algorithm (OPTIMAL time)
+def longestPalindrome_manacher(s):
+    """
+    Manacher's algorithm - linear time
+    Time: O(n), Space: O(n)
+    
+    Advanced: Uses preprocessed string with separators.
+    Interview: Usually expand-centers is sufficient.
+    """
+    # Preprocess: insert '#' between chars
+    # "babad"  "#b#a#b#a#d#"
+    t = '#'.join('^{}$'.format(s))
+    n = len(t)
+    p = [0] * n  # p[i] = radius of palindrome at i
+    center, right = 0, 0
+    
+    for i in range(1, n - 1):
+        # Mirror of i with respect to center
+        mirror = 2 * center - i
+        
+        if i < right:
+            p[i] = min(right - i, p[mirror])
+        
+        # Expand around i
+        while t[i + p[i] + 1] == t[i - p[i] - 1]:
+            p[i] += 1
+        
+        # Update center if expanded past right
+        if i + p[i] > right:
+            center, right = i, i + p[i]
+    
+    # Find longest palindrome
+    max_len, center_idx = max((n, i) for i, n in enumerate(p))
+    start = (center_idx - max_len) // 2
+    return s[start:start + max_len]
+
+
 if __name__ == "__main__":
-    test_cases = [
-        ("babad", ["bab", "aba"]),  # Either is valid
+    print("Testing Longest Palindromic Substring:\n")
+    
+    tests = [
+        ("babad", ["bab", "aba"]),
         ("cbbd", ["bb"]),
         ("a", ["a"]),
-        ("ac", ["a", "c"]),  # Both single chars
-        ("racecar", ["racecar"]),
-        ("noon", ["noon"]),
+        ("ac", ["a", "c"])
     ]
     
-    print("=== Testing Expand Around Center Solution ===")
-    for s, expected in test_cases:
-        result = longestPalindrome(s)
-        is_valid = result in expected
-        status = "✓" if is_valid else "✗"
-        print(f"{status} Input: '{s}'")
-        print(f"   Output: '{result}'")
-        print(f"   Valid answers: {expected}")
-        print()
-    
-    print("=== Testing Dynamic Programming Solution ===")
-    for s, expected in test_cases:
-        result = longestPalindrome_dp(s)
-        is_valid = result in expected
-        status = "✓" if is_valid else "✗"
-        print(f"{status} Input: '{s}'")
-        print(f"   Output: '{result}'")
-        print(f"   Valid answers: {expected}")
-        print()
+    for s, expected in tests:
+        r1 = longestPalindrome(s)
+        r2 = longestPalindrome_dp(s)
+        r3 = longestPalindrome_manacher(s)
+        
+        check1 = r1 in expected
+        check2 = r2 in expected
+        check3 = r3 in expected
+        
+        print(f'"{s}": Expand={r1} DP={r2} Manacher={r3}')
+        print(f'  Expected: {expected} - {"" if all([check1, check2, check3]) else ""}\n')

@@ -1,42 +1,136 @@
 """
-LeetCode #78 - Subsets
-Topic: Backtracking
-Difficulty: Medium
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    LeetCode #78 - Subsets                                     ║
+║                    Topic: Backtracking                                       ║
+║                    Difficulty: Medium                                         ║
+║                    Company: Amazon, Facebook, Google                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-PROBLEM EXPLANATION (Easy Terms):
-Generate all possible subsets (power set).
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🎯 QUESTION IN SIMPLE TERMS                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Example:
-[1,2,3] -> [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
+WHAT'S THE PROBLEM?
+───────────────────
+Given array of UNIQUE integers, return ALL possible subsets (power set).
 
-Think of it like:
-All possible selections from a group!
+EXAMPLES:
+─────────
+✓ Input: [1,2,3]  
+  Output: [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
 
-WHY THIS WORKS (Simple Explanation):
-For each element, choose to include it or not.
-Build subsets by adding one element at a time.
+✓ Input: [0]      → Output: [[],[0]]
 
-Time: O(n × 2^n)
-Space: O(2^n)
+IMAGINE THIS (CHILD-FRIENDLY):
+──────────────────────────────
+🍕 Pizza toppings: cheese, peppers, onions.
+   What are ALL possible pizza combinations?
+   - Plain (no toppings)
+   - Just cheese
+   - Just peppers
+   - Cheese + peppers
+   - etc.
+
+📦 Packing: You have 3 items. What are all ways to pack?
+   (including packing nothing!)
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ⭐ AMAZON STAR METHOD ANSWER                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📌 SITUATION:
+   Amazon product bundles: given n items, generate all
+   possible bundle combinations for customers.
+
+📌 TASK:
+   Return all subsets (2^n total).
+   Time O(2^n × n), Space O(n).
+
+📌 ACTION:
+   Backtracking: for each element, include or exclude.
+
+📌 RESULT:
+   ✓ Time: O(2^n × n) - 2^n subsets, n to copy
+   ✓ Space: O(n) recursion
+   ✓ All bundle options generated
+
 """
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 🚀 OPTIMAL SOLUTION - Backtracking
+# ═══════════════════════════════════════════════════════════════════════════
 def subsets(nums):
-    """Generate all subsets"""
+    """
+    Backtracking - generate all subsets
+    
+    Example: [1,2,3]
+    ───────
+                    []
+            /               \\
+          [1]                []
+        /     \\            /    \\
+     [1,2]    [1]        [2]     []
+     /  \\    /  \\      /  \\    /  \\
+  [1,2,3][1,2][1,3][1][2,3][2][3][]
+    """
     result = []
     
     def backtrack(start, path):
+        # Add current subset
         result.append(path[:])
         
+        # Try adding each remaining element
         for i in range(start, len(nums)):
+            # Include nums[i]
             path.append(nums[i])
             backtrack(i + 1, path)
+            # Exclude nums[i] (backtrack)
             path.pop()
     
     backtrack(0, [])
     return result
 
 
-# Test
+# ═══════════════════════════════════════════════════════════════════════════
+# 📚 ALTERNATIVE - Iterative
+# ═══════════════════════════════════════════════════════════════════════════
+def subsets_iterative(nums):
+    """
+    Iterative: build subsets incrementally
+    
+    Start: [[]]
+    Add 1: [[], [1]]
+    Add 2: [[], [1], [2], [1,2]]
+    Add 3: [[], [1], [2], [1,2], [3], [1,3], [2,3], [1,2,3]]
+    """
+    result = [[]]
+    
+    for num in nums:
+        result += [curr + [num] for curr in result]
+    
+    return result
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🧪 TEST CASES
+# ═══════════════════════════════════════════════════════════════════════════
+
 if __name__ == "__main__":
-    result = subsets([1,2,3])
-    print(f"Subsets of [1,2,3]: {result}")
+    test_cases = [
+        [1, 2, 3],
+        [0],
+        [1, 2],
+    ]
+    
+    print("=" * 70)
+    print("🧪 TESTING SUBSETS")
+    print("=" * 70)
+    
+    for nums in test_cases:
+        result1 = subsets(nums)
+        result2 = subsets_iterative(nums)
+        
+        print(f"\nInput: {nums}")
+        print(f"Count: {len(result1)} subsets")
+        print(f"Backtrack: {result1}")
+        print(f"Iterative: {result2}")

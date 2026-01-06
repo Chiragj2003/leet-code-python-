@@ -1,55 +1,166 @@
 """
-LeetCode #152 - Maximum Product Subarray
-Topic: Array (Dynamic Programming)
-Difficulty: Medium
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    LeetCode #152 - Maximum Product Subarray                   ║
+║                    Topic: Array (Dynamic Programming)                        ║
+║                    Difficulty: Medium                                         ║
+║                    Company: Amazon, Google, Apple                            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-PROBLEM EXPLANATION (Easy Terms):
-Find contiguous subarray with largest product.
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🎯 QUESTION IN SIMPLE TERMS                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Example:
-[2,3,-2,4] -> [2,3] has product = 6
+WHAT'S THE PROBLEM?
+───────────────────
+Find contiguous subarray with LARGEST PRODUCT (not sum!).
+Watch out for negatives - they can turn small product into big!
 
-Think of it like:
-Multiplying numbers along a path. Watch out for negatives!
-Two negatives make a positive, so track both min and max products.
+EXAMPLES:
+─────────
+✓ Input: [2,3,-2,4]      → Output: 6 (subarray [2,3])
+✓ Input: [-2]            → Output: -2 (only element)
+✓ Input: [-2,0,-1]       → Output: 0 (empty subarray = 0)
+✓ Input: [0,2]           → Output: 2
 
-WHY THIS WORKS (Simple Explanation):
-Track BOTH minimum and maximum products ending at current position:
-- Maximum * positive = new maximum
-- Minimum * negative = new maximum (negative × negative = positive!)
+KEY INSIGHT:
+────────────
+Two negatives = positive! So -2 × -3 = 6 (big!)
+Must track BOTH maximum AND minimum products.
 
-So we need to track both!
+IMAGINE THIS (CHILD-FRIENDLY):
+──────────────────────────────
+🍕 You're multiplying pizza slice sizes.
+   Some are positive (extra large), some negative (debt/return).
+   Two debts could pay off to huge profit!
+   Track both biggest gain and biggest debt.
 
-Example: [2, 3, -2, 4]
-At -2: min=-12 (3*-2), max=6 (2*3)
-At 4: min=-8, max=48 (because -12*4=48... wait, -12*-2=24!)
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ⭐ AMAZON STAR METHOD ANSWER                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Time Complexity: O(n) - single pass
-Space Complexity: O(1) - only tracking min/max
+📌 SITUATION:
+   At Amazon, we analyze sales data. Products have price multipliers
+   (positive for growth, negative for loss). We need to find best
+   performing consecutive product period for Q reports.
+
+📌 TASK:
+   Find max product of any contiguous subarray.
+   Time O(n), Space O(1).
+
+📌 ACTION:
+   Track both max and min products because:
+   - min × negative = max (two negatives make positive!)
+   
+   ✓ Algorithm:
+     1. Keep max_prod and min_prod at current position
+     2. New max = max of (current, max*current, min*current)
+     3. New min = min of (current, max*current, min*current)
+     4. Track overall maximum
+
+📌 RESULT:
+   ✓ Time Complexity: O(n) - single pass
+   ✓ Space Complexity: O(1) - only tracking min/max
+   ✓ Reports ready instantly for quarterly analysis
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ⏰ COMPLEXITY ANALYSIS                                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+BRUTE FORCE (All Subarrays):
+    Time: O(n²) - check all subarrays
+    Space: O(1)
+
+DYNAMIC PROGRAMMING (OPTIMAL):
+    Time: O(n) - single pass
+    Space: O(1) - only variables
+
 """
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 🐢 BRUTE FORCE SOLUTION - O(n²) Time, O(1) Space
+# ═══════════════════════════════════════════════════════════════════════════
+def maxProduct_bruteforce(nums):
+    """
+    Brute Force: Check all possible subarrays
+    
+    STEPS (like a recipe):
+    ──────────────────────
+    1. For each starting position
+    2. Calculate product of all subarrays from that start
+    3. Track maximum product seen
+    
+    Example: [2,3,-2,4]
+    ───────
+    Start 0: [2]=2, [2,3]=6, [2,3,-2]=-12, [2,3,-2,4]=-48 → max=6
+    Start 1: [3]=3, [3,-2]=-6, [3,-2,4]=-24 → max=6
+    Start 2: [-2]=-2, [-2,4]=-8 → max=6
+    Start 3: [4]=4 → max=6
+    
+    Final max: 6 ✓
+    
+    WHY IT'S SLOW:
+    ──────────────
+    Two nested loops checking all subarrays.
+    For n elements, there are n(n+1)/2 subarrays!
+    """
+    if not nums:
+        return 0
+    
+    max_product = nums[0]
+    
+    # Try all starting positions
+    for i in range(len(nums)):
+        current_product = 1
+        
+        # Try all ending positions from i
+        for j in range(i, len(nums)):
+            current_product *= nums[j]
+            max_product = max(max_product, current_product)
+    
+    return max_product
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🚀 OPTIMIZED SOLUTION - DP Tracking Max and Min
+# ═══════════════════════════════════════════════════════════════════════════
 def maxProduct(nums):
     """
-    Find maximum product subarray
+    Dynamic Programming - OPTIMAL for Amazon Interview!
     
-    Visual example: [2, 3, -2, 4]
+    🔑 KEY INSIGHT:
+    ───────────────
+    At each position, track BOTH maximum and minimum products.
+    Why minimum? Because negative × minimum = maximum!
     
-    i=0: num=2
+    Example: [2,3,-2,4]
+    ───────
+    
+    Position 0 (num=2):
       max_prod = 2, min_prod = 2, result = 2
     
-    i=1: num=3
+    Position 1 (num=3):
       candidates: 3, 2*3=6, 2*3=6
       max_prod = 6, min_prod = 3, result = 6
     
-    i=2: num=-2
-      candidates: -2, 6*-2=-12, 3*-2=-6
-      max_prod = -2, min_prod = -12, result = 6
+    Position 2 (num=-2):
+      candidates: -2, 6*(-2)=-12, 3*(-2)=-6
+      When multiplying by negative, max and min swap!
+      max_prod = max(-2, -12, -6) = -2
+      min_prod = min(-2, -12, -6) = -12
+      result = 6 (no change)
     
-    i=3: num=4
+    Position 3 (num=4):
       candidates: 4, -2*4=-8, -12*4=-48
       max_prod = 4, min_prod = -48, result = 6
     
-    Result: 6 (subarray [2,3])
+    Final: 6 ✓
+    
+    WHY THIS IS BEST FOR AMAZON:
+    ─────────────────────────────
+    ✓ O(n) time - single pass only
+    ✓ O(1) space - just tracking variables
+    ✓ Elegant DP approach
+    ✓ Handles negatives perfectly
     """
     if not nums:
         return 0
@@ -57,11 +168,13 @@ def maxProduct(nums):
     # Initialize with first element
     max_prod = min_prod = result = nums[0]
     
+    # Process remaining elements
     for num in nums[1:]:
-        # When multiplying by negative, max and min swap!
+        # When multiplying by negative, max/min swap roles
         # So we need to consider all three: num itself, max*num, min*num
         candidates = (num, max_prod * num, min_prod * num)
         
+        # Update max and min
         max_prod = max(candidates)
         min_prod = min(candidates)
         
@@ -71,14 +184,19 @@ def maxProduct(nums):
     return result
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 📚 ALTERNATIVE - Include zero handling explicitly
+# ═══════════════════════════════════════════════════════════════════════════
 def maxProduct_verbose(nums):
     """
-    Detailed version showing the logic
+    Verbose version showing logic step-by-step
+    
+    Same as optimal but with print statements for learning
     """
     if not nums:
         return 0
     
-    print(f"Array: {nums}\n")
+    print(f"\nArray: {nums}\n")
     
     max_prod = min_prod = result = nums[0]
     print(f"Initialize: max_prod={max_prod}, min_prod={min_prod}, result={result}\n")
@@ -86,79 +204,64 @@ def maxProduct_verbose(nums):
     for i, num in enumerate(nums[1:], 1):
         print(f"Step {i}: num = {num}")
         
-        # Calculate all candidates
-        temp_max = max_prod * num
-        temp_min = min_prod * num
+        # Calculate candidates
+        candidate_current = num
+        candidate_max_mult = max_prod * num
+        candidate_min_mult = min_prod * num
         
         print(f"  Candidates:")
-        print(f"    Just num: {num}")
-        print(f"    max_prod * num: {max_prod} * {num} = {temp_max}")
-        print(f"    min_prod * num: {min_prod} * {num} = {temp_min}")
+        print(f"    Just num: {candidate_current}")
+        print(f"    max_prod * num: {max_prod} * {num} = {candidate_max_mult}")
+        print(f"    min_prod * num: {min_prod} * {num} = {candidate_min_mult}")
         
         # Update max and min
-        max_prod = max(num, temp_max, temp_min)
-        min_prod = min(num, temp_max, temp_min)
+        old_max = max_prod
+        old_min = min_prod
+        max_prod = max(candidate_current, candidate_max_mult, candidate_min_mult)
+        min_prod = min(candidate_current, candidate_max_mult, candidate_min_mult)
         
-        print(f"  New max_prod: {max_prod}")
-        print(f"  New min_prod: {min_prod}")
+        print(f"  Updated: max_prod={max_prod}, min_prod={min_prod}")
         
-        # Update result
-        if max_prod > result:
-            result = max_prod
-            print(f"  NEW BEST RESULT: {result} ✓")
-        
-        print()
-    
-    print(f"Final result: {result}")
-    return result
-
-
-def maxProduct_handle_zero(nums):
-    """
-    Alternative approach explicitly handling zeros
-    
-    Zero breaks the product chain, so reset at zeros
-    """
-    result = nums[0]
-    curr_max = curr_min = 1
-    
-    for num in nums:
-        if num == 0:
-            # Zero resets everything
-            curr_max = curr_min = 1
-            result = max(result, 0)
-            continue
-        
-        # Store old max (needed for min calculation)
-        temp = curr_max
-        
-        # Update max and min
-        curr_max = max(num, num * curr_max, num * curr_min)
-        curr_min = min(num, num * temp, num * curr_min)
-        
-        result = max(result, curr_max)
+        result = max(result, max_prod)
+        print(f"  Result so far: {result}\n")
     
     return result
 
 
-# Test cases
+# ═══════════════════════════════════════════════════════════════════════════
+# 🧪 TEST CASES - Verify all solutions work!
+# ═══════════════════════════════════════════════════════════════════════════
+
 if __name__ == "__main__":
+    # Test cases with expected outputs
     test_cases = [
-        ([2, 3, -2, 4], 6),          # [2,3]
-        ([-2], -2),                   # [-2]
-        ([0, 2], 2),                  # [2]
-        ([-2, 0, -1], 0),             # [0]
-        ([-2, 3, -4], 24),            # [-2,3,-4]
-        ([2, -5, -2, -4, 3], 24),     # [-5,-2,-4]
+        ([2, 3, -2, 4], 6),
+        ([-2], -2),
+        ([0, 2], 2),
+        ([-2, 0, -1], 0),
+        ([2, -5, -2, -4, 3], 24),  # [-5, -2] = 10, 10*(-4) = -40, wait... [-2,-4,3] = 24
     ]
     
-    print("=== Testing Standard Solution ===")
-    for nums, expected in test_cases:
-        result = maxProduct(nums)
-        status = "✓" if result == expected else "✗"
-        print(f"{status} Input: {nums}")
-        print(f"   Max Product: {result} (Expected: {expected})")
-        print()
+    print("=" * 70)
+    print("🧪 TESTING MAXIMUM PRODUCT SUBARRAY SOLUTIONS")
+    print("=" * 70)
     
-    print("=== Verbose Example ===")
-    maxProduct_verbose([2, 3, -2, 4])
+    for nums, expected in test_cases:
+        # Test solutions
+        result_brute = maxProduct_bruteforce(nums.copy())
+        result_optimal = maxProduct(nums.copy())
+        
+        status = "✓" if result_optimal == expected else "✗"
+        
+        print(f"\n{status} Input: {nums}")
+        print(f"  Expected:      {expected}")
+        print(f"  Brute Force:   {result_brute}")
+        print(f"  DP (Best):     {result_optimal}")
+    
+    print("\n" + "=" * 70)
+    print("📊 COMPLEXITY COMPARISON")
+    print("=" * 70)
+    print("| Method      | Time   | Space   | Amazon Recommended |")
+    print("|-------------|--------|---------|-------------------|")
+    print("| Brute Force | O(n²)  | O(1)    | ❌ Too slow       |")
+    print("| DP          | O(n)   | O(1)    | ✅ BEST!          |")

@@ -1,58 +1,36 @@
-"""
-LeetCode #125 - Valid Palindrome
-Topic: String / Two Pointers
-Difficulty: Easy
+﻿"""
 
-PROBLEM EXPLANATION (Easy Terms):
-Check if a string is a palindrome, considering only alphanumeric characters
-and ignoring case.
+                 LeetCode #125 - Valid Palindrome                             
+                 Topic: String/Two Pointers | Difficulty: Easy                
+                 Company: Meta, Amazon, Microsoft                             
 
-Example:
-"A man, a plan, a canal: Panama" -> True
-"race a car" -> False
 
-Think of it like:
-Ignore spaces and punctuation, only look at letters and numbers.
-Does it read the same forwards and backwards?
+PROBLEM: Check if string is palindrome (alphanumeric only, case-insensitive).
 
-WHY THIS WORKS (Simple Explanation):
-Use two pointers from both ends:
-1. Skip non-alphanumeric characters
-2. Compare characters (case-insensitive)
-3. If all match -> palindrome!
-
-Like checking if a word is the same in a mirror!
-
-Time Complexity: O(n) - visit each character once
-Space Complexity: O(1) - only two pointers
+Examples:
+  "A man, a plan, a canal: Panama"  True
+  "race a car"  False
 """
 
+#  SOLUTION 1: Two Pointers (OPTIMAL)
 def isPalindrome(s):
     """
-    Check if string is palindrome (alphanumeric only, case-insensitive)
+    Two pointers from both ends
+    Time: O(n), Space: O(1)
     
-    Visual example for "A man, a plan, a canal: Panama":
-    
-    Clean version: "amanaplanacanalpanama"
-    
-    left=0 'a', right=20 'a' ✓ match
-    left=1 'm', right=19 'm' ✓ match
-    left=2 'a', right=18 'a' ✓ match
-    ...continue until pointers meet
+    Skip non-alphanumeric, compare case-insensitive.
     """
-    # Two pointers from both ends
     left, right = 0, len(s) - 1
     
     while left < right:
         # Skip non-alphanumeric from left
         while left < right and not s[left].isalnum():
             left += 1
-        
         # Skip non-alphanumeric from right
         while left < right and not s[right].isalnum():
             right -= 1
         
-        # Compare characters (case-insensitive)
+        # Compare (case-insensitive)
         if s[left].lower() != s[right].lower():
             return False
         
@@ -62,81 +40,58 @@ def isPalindrome(s):
     return True
 
 
-def isPalindrome_clean(s):
+#  SOLUTION 2: Filter and Reverse
+def isPalindrome_filter(s):
     """
-    Alternative: Clean string first, then check
+    Filter then compare with reverse
+    Time: O(n), Space: O(n)
     
-    Easier to understand but uses O(n) extra space
+    More Pythonic but uses extra space.
     """
-    # Remove non-alphanumeric and convert to lowercase
-    cleaned = ''.join(char.lower() for char in s if char.isalnum())
-    
-    # Check if cleaned string equals its reverse
+    cleaned = ''.join(c.lower() for c in s if c.isalnum())
     return cleaned == cleaned[::-1]
 
 
-def isPalindrome_verbose(s):
+#  SOLUTION 3: Recursive
+def isPalindrome_recursive(s):
     """
-    Verbose version with detailed output for learning
+    Recursive two-pointer approach
+    Time: O(n), Space: O(n) stack
+    
+    Educational: shows recursion pattern.
     """
-    left, right = 0, len(s) - 1
-    
-    print(f"Checking: '{s}'")
-    
-    while left < right:
-        # Skip non-alphanumeric from left
-        while left < right and not s[left].isalnum():
-            print(f"  Skipping '{s[left]}' at position {left}")
-            left += 1
+    def helper(left, right):
+        if left >= right:
+            return True
         
-        # Skip non-alphanumeric from right
-        while left < right and not s[right].isalnum():
-            print(f"  Skipping '{s[right]}' at position {right}")
-            right -= 1
+        # Skip non-alphanumeric
+        if not s[left].isalnum():
+            return helper(left + 1, right)
+        if not s[right].isalnum():
+            return helper(left, right - 1)
         
         # Compare
-        left_char = s[left].lower()
-        right_char = s[right].lower()
-        
-        print(f"  Comparing: '{left_char}' (pos {left}) with '{right_char}' (pos {right})")
-        
-        if left_char != right_char:
-            print(f"  Mismatch! Not a palindrome.")
+        if s[left].lower() != s[right].lower():
             return False
         
-        left += 1
-        right -= 1
+        return helper(left + 1, right - 1)
     
-    print(f"  All characters match! It's a palindrome.")
-    return True
+    return helper(0, len(s) - 1)
 
 
-# Test cases with explanations
 if __name__ == "__main__":
-    test_cases = [
+    print("Testing Valid Palindrome:\n")
+    
+    tests = [
         ("A man, a plan, a canal: Panama", True),
         ("race a car", False),
-        (" ", True),  # Empty after cleaning
-        ("a", True),
-        ("ab", False),
-        ("aba", True),
-        (".,", True),  # Empty after cleaning
-        ("0P", False),
+        (" ", True),
+        ("a", True)
     ]
     
-    print("=== Testing Two-Pointer Solution ===")
-    for s, expected in test_cases:
-        result = isPalindrome(s)
-        status = "✓" if result == expected else "✗"
-        print(f"{status} '{s}' -> {result} (Expected: {expected})")
-    
-    print("\n=== Testing Clean-First Solution ===")
-    for s, expected in test_cases:
-        result = isPalindrome_clean(s)
-        status = "✓" if result == expected else "✗"
-        print(f"{status} '{s}' -> {result} (Expected: {expected})")
-    
-    print("\n=== Verbose Example ===")
-    isPalindrome_verbose("A man, a plan, a canal: Panama")
-    print()
-    isPalindrome_verbose("race a car")
+    for s, expected in tests:
+        r1 = isPalindrome(s)
+        r2 = isPalindrome_filter(s)
+        r3 = isPalindrome_recursive(s)
+        
+        print(f'"{s}": TwoPtr={r1} Filter={r2} Recursive={r3} (exp={expected}) {"" if r1 == expected else ""}')

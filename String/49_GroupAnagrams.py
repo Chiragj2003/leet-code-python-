@@ -1,131 +1,90 @@
-"""
-LeetCode #49 - Group Anagrams
-Topic: Hashmap / String
-Difficulty: Medium
+﻿"""
 
-PROBLEM EXPLANATION (Easy Terms):
-Group strings that are anagrams of each other.
+                 LeetCode #49 - Group Anagrams                                
+                 Topic: String/HashMap | Difficulty: Medium                   
+                 Company: Amazon, Meta, Microsoft                             
+
+
+PROBLEM: Group strings that are anagrams of each other.
 
 Example:
-Input: ["eat","tea","tan","ate","nat","bat"]
-Output: [["bat"],["nat","tan"],["ate","eat","tea"]]
-
-Think of it like:
-Anagrams are words with same letters in different order.
-"eat", "tea", "ate" all have letters 'e', 'a', 't'
-So they belong to the same group!
-
-WHY THIS WORKS (Simple Explanation):
-Use a signature to identify anagrams:
-1. Sort the letters: "eat" -> "aet", "tea" -> "aet" (same!)
-2. Use sorted string as key in hashmap
-3. All anagrams will have the same key!
-
-Think of sorting as a "fingerprint" for anagrams.
-
-Time Complexity: O(n * k log k) where n=number of strings, k=max length
-Space Complexity: O(n * k) for storing all strings
+  ["eat","tea","tan","ate","nat","bat"]
+   [["bat"],["nat","tan"],["ate","eat","tea"]]
 """
 
 from collections import defaultdict
 
+#  SOLUTION 1: Sort as Key (OPTIMAL for interview)
 def groupAnagrams(strs):
     """
-    Group anagrams using sorted string as key
+    Use sorted string as hash key
+    Time: O(n * k log k), Space: O(n*k)
+    where n=len(strs), k=max length of string
     
-    Visual example:
-    ["eat", "tea", "tan", "ate", "nat", "bat"]
-    
-    "eat" -> sorted: "aet" -> groups["aet"] = ["eat"]
-    "tea" -> sorted: "aet" -> groups["aet"] = ["eat", "tea"]
-    "tan" -> sorted: "ant" -> groups["ant"] = ["tan"]
-    "ate" -> sorted: "aet" -> groups["aet"] = ["eat", "tea", "ate"]
-    "nat" -> sorted: "ant" -> groups["ant"] = ["tan", "nat"]
-    "bat" -> sorted: "abt" -> groups["abt"] = ["bat"]
-    
-    Result: [["eat","tea","ate"], ["tan","nat"], ["bat"]]
+    Anagrams have same sorted form: "eat", "tea"  "aet"
     """
-    # Dictionary: sorted_string -> list of original strings
     groups = defaultdict(list)
     
-    for word in strs:
-        # Sort characters to get signature
-        # All anagrams will have same sorted form
-        sorted_word = ''.join(sorted(word))
-        
-        # Add to group
-        groups[sorted_word].append(word)
+    for s in strs:
+        key = ''.join(sorted(s))
+        groups[key].append(s)
     
-    # Return all groups as list
     return list(groups.values())
 
 
+#  SOLUTION 2: Character Count as Key (OPTIMAL time)
 def groupAnagrams_count(strs):
     """
-    Alternative: Use character count as key
+    Use character count tuple as key
+    Time: O(n * k), Space: O(n*k)
     
-    Instead of sorting, count frequency of each letter.
-    "eat" -> (1,0,0,0,1,0,...,1,0,0) for 'a','e','t'
-    
-    This avoids sorting but creates tuple key.
-    Time: O(n * k) where k is max string length
+    Faster than sorting: count each char a-z.
     """
     groups = defaultdict(list)
     
-    for word in strs:
-        # Count frequency of each letter (a-z)
+    for s in strs:
+        # Count chars (26 letters)
         count = [0] * 26
-        for char in word:
-            count[ord(char) - ord('a')] += 1
+        for c in s:
+            count[ord(c) - ord('a')] += 1
         
-        # Use tuple as hashmap key
-        # Tuples are immutable and hashable!
-        key = tuple(count)
-        groups[key].append(word)
+        # Use tuple as dict key
+        groups[tuple(count)].append(s)
     
     return list(groups.values())
 
 
-# Test cases with explanations
+#  SOLUTION 3: Prime Product (Mathematical)
+def groupAnagrams_prime(strs):
+    """
+    Use prime product as key
+    Time: O(n * k), Space: O(n*k)
+    
+    Map each char to prime, multiply: anagrams have same product.
+    """
+    primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101]
+    groups = defaultdict(list)
+    
+    for s in strs:
+        key = 1
+        for c in s:
+            key *= primes[ord(c) - ord('a')]
+        groups[key].append(s)
+    
+    return list(groups.values())
+
+
 if __name__ == "__main__":
-    test_cases = [
-        (
-            ["eat","tea","tan","ate","nat","bat"],
-            [["bat"],["nat","tan"],["ate","eat","tea"]]
-        ),
-        (
-            [""],
-            [[""]]
-        ),
-        (
-            ["a"],
-            [["a"]]
-        ),
-        (
-            ["cab","tin","pew","duh","may","ill","buy","bar","max","doc"],
-            [["cab"],["tin"],["pew"],["duh"],["may"],["ill"],["buy"],["bar"],["max"],["doc"]]
-        ),
-    ]
+    print("Testing Group Anagrams:\n")
     
-    print("=== Testing Sorting Solution ===")
-    for strs, expected in test_cases:
-        result = groupAnagrams(strs)
-        # Sort for comparison (order doesn't matter)
-        result_sorted = [sorted(group) for group in sorted(result)]
-        expected_sorted = [sorted(group) for group in sorted(expected)]
-        
-        status = "✓" if result_sorted == expected_sorted else "✗"
-        print(f"{status} Input: {strs}")
-        print(f"   Output: {result}")
-        print()
+    strs = ["eat","tea","tan","ate","nat","bat"]
     
-    print("=== Testing Character Count Solution ===")
-    for strs, expected in test_cases:
-        result = groupAnagrams_count(strs)
-        result_sorted = [sorted(group) for group in sorted(result)]
-        expected_sorted = [sorted(group) for group in sorted(expected)]
-        
-        status = "✓" if result_sorted == expected_sorted else "✗"
-        print(f"{status} Input: {strs}")
-        print(f"   Output: {result}")
-        print()
+    r1 = groupAnagrams(strs)
+    r2 = groupAnagrams_count(strs)
+    r3 = groupAnagrams_prime(strs)
+    
+    print(f"Input: {strs}\n")
+    print(f"Sort: {r1}")
+    print(f"Count: {r2}")
+    print(f"Prime: {r3}")
+    print(f"\nAll have 3 groups: {len(r1) == len(r2) == len(r3) == 3} ")

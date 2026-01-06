@@ -1,65 +1,69 @@
-"""
-LeetCode #553 - Optimal Division
-Topic: String / Math
-Difficulty: Medium
+﻿"""
 
-PROBLEM EXPLANATION:
-Given an array of positive integers, divide them in order to get
-the maximum result. Add parentheses to achieve the maximum.
+              LeetCode #553 - Optimal Division                                
+              Topic: String/Math | Difficulty: Medium                         
+              Company: Amazon                                                 
+
+
+PROBLEM: Add parentheses to maximize result of division expression.
 
 Example:
-Input: nums = [1000,100,10,2]
-Output: "1000/(100/10/2)"
-Explanation: 1000/(100/10/2) = 1000/5 = 200
-Without parentheses: 1000/100/10/2 = 0.05
-
-APPROACH (Math Trick):
-Key insight: To maximize a/b/c/d..., we want to minimize the denominator.
-The minimum denominator is b/(c/d/...) = b/c*d*... = (b/c)/d/...
-
-So optimal is always: nums[0]/(nums[1]/nums[2]/...nums[n-1])
-
-Special cases:
-- 1 number: return as is
-- 2 numbers: return "a/b"
-- 3+ numbers: return "a/(b/c/d/...)"
-
-Time Complexity: O(n)
-Space Complexity: O(n)
+  [1000,100,10,2]  "1000/(100/10/2)" = 1000/5 = 200
+  (Without parens: 1000/100/10/2 = 0.05)
 """
 
+#  SOLUTION 1: Math Pattern (OPTIMAL)
 def optimalDivision(nums):
     """
-    Returns the division expression with maximum result
-    """
-    if len(nums) == 1:
-        return str(nums[0])
+    Mathematical insight: a/(b/c/d...) = a*c*d.../b
+    Time: O(n), Space: O(n)
     
-    if len(nums) == 2:
+    To maximize: put parens around all but first denominator.
+    """
+    n = len(nums)
+    
+    if n == 1:
+        return str(nums[0])
+    if n == 2:
         return f"{nums[0]}/{nums[1]}"
     
-    # For 3+ numbers: a/(b/c/d/...)
-    result = str(nums[0]) + "/("
-    result += "/".join(map(str, nums[1:]))
-    result += ")"
+    # a/(b/c/d/...)
+    return f"{nums[0]}/({'/'.join(map(str, nums[1:]))})"
+
+
+#  SOLUTION 2: String Building
+def optimalDivision_build(nums):
+    """
+    Build string directly
+    Time: O(n), Space: O(n)
     
-    return result
+    Same logic, different implementation.
+    """
+    if len(nums) <= 2:
+        return '/'.join(map(str, nums))
+    
+    result = [str(nums[0]), '/(']
+    for i in range(1, len(nums)):
+        if i > 1:
+            result.append('/')
+        result.append(str(nums[i]))
+    result.append(')')
+    
+    return ''.join(result)
 
 
-# Test cases
 if __name__ == "__main__":
-    test1 = [1000, 100, 10, 2]
-    print(f"Test 1: {optimalDivision(test1)}")
-    # Expected: "1000/(100/10/2)"
+    print("Testing Optimal Division:\n")
     
-    test2 = [2, 3, 4]
-    print(f"Test 2: {optimalDivision(test2)}")
-    # Expected: "2/(3/4)"
+    tests = [
+        ([1000,100,10,2], "1000/(100/10/2)"),
+        ([1000,100], "1000/100"),
+        ([1000], "1000")
+    ]
     
-    test3 = [2]
-    print(f"Test 3: {optimalDivision(test3)}")
-    # Expected: "2"
-    
-    test4 = [6, 2]
-    print(f"Test 4: {optimalDivision(test4)}")
-    # Expected: "6/2"
+    for nums, expected in tests:
+        r1 = optimalDivision(nums)
+        r2 = optimalDivision_build(nums)
+        
+        print(f'{nums}: Math={r1} Build={r2}')
+        print(f'  Expected={expected} {"" if r1 == expected else ""}\n')

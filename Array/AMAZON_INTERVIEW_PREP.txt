@@ -1,0 +1,286 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║           AMAZON INTERVIEW PREPARATION - ARRAY LEETCODE PROBLEMS              ║
+║                    COMPREHENSIVE STUDY GUIDE (STAR FORMAT)                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📚 PROBLEMS CREATED (12 Essential Array Problems):
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ EASY DIFFICULTY:
+───────────────────
+1. #136 - Single Number
+   • XOR bit manipulation
+   • Time: O(n), Space: O(1)
+   • Best: XOR cancellation technique
+
+2. #217 - Contains Duplicate
+   • Set-based duplicate detection
+   • Time: O(n), Space: O(n)
+   • Best: Hash set approach
+
+3. #268 - Missing Number
+   • Math formula or XOR approach
+   • Time: O(n), Space: O(1)
+   • Best: Sum formula technique
+
+4. #283 - Move Zeroes
+   • Two-pointer in-place manipulation
+   • Time: O(n), Space: O(1)
+   • Best: In-place two-pointer method
+
+
+✅ MEDIUM DIFFICULTY:
+──────────────────────
+5. #48 - Rotate Image (Matrix)
+   • Transpose + reverse technique
+   • Time: O(n²), Space: O(1)
+   • Best: Three-step reversal pattern
+
+6. #189 - Rotate Array
+   • Array rotation with minimal space
+   • Time: O(n), Space: O(1)
+   • Best: Three-reverse algorithm
+
+7. #152 - Maximum Product Subarray
+   • Dynamic programming tracking min/max
+   • Time: O(n), Space: O(1)
+   • Best: DP with both max and min tracking
+
+8. #238 - Product of Array Except Self
+   • Left-right product approach
+   • Time: O(n), Space: O(1)*
+   • Best: Two-pass left-right products
+
+9. #169 - Majority Element
+   • Boyer-Moore voting algorithm
+   • Time: O(n), Space: O(1)
+   • Best: Elegant voting technique
+
+10. #75 - Sort Colors
+    • Three-pointer Dutch flag problem
+    • Time: O(n), Space: O(1)
+    • Best: Three-pointer in-place sort
+
+11. #56 - Merge Intervals
+    • Sort + merge overlapping intervals
+    • Time: O(n log n), Space: O(n)
+    • Best: Sort then scan approach
+
+
+✅ HARD DIFFICULTY:
+────────────────────
+12. #41 - First Missing Positive
+    • Array as hash table technique
+    • Time: O(n), Space: O(1)
+    • Best: In-place array hashing
+
+
+═══════════════════════════════════════════════════════════════════════════════
+📋 EACH FILE INCLUDES:
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ QUESTION IN SIMPLE TERMS
+  - Clear explanation a child can understand
+  - Real-world examples (not technical jargon)
+
+✓ AMAZON STAR METHODOLOGY
+  - Situation: Real-world Amazon problem
+  - Task: What exactly to solve
+  - Action: How you'd solve it step-by-step
+  - Result: What you achieved
+
+✓ BRUTE FORCE SOLUTION
+  - Easy to understand approach
+  - Shows thought process
+  - Demonstrates why it's inefficient
+
+✓ OPTIMIZED SOLUTION (AMAZON PREFERRED!)
+  - Best time/space complexity
+  - Detailed comments for clarity
+  - Why this approach works
+
+✓ ALTERNATIVE SOLUTIONS
+  - Different valid approaches
+  - Trade-offs between solutions
+
+✓ TEST CASES
+  - Multiple test scenarios
+  - Edge cases included
+  - Expected vs actual outputs
+
+✓ COMPLEXITY COMPARISON TABLE
+  - Time and space analysis
+  - Which approach Amazon prefers
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 HOW TO USE FOR AMAZON INTERVIEW PREP:
+═══════════════════════════════════════════════════════════════════════════════
+
+1️⃣ READ THE PROBLEM (5 mins)
+   • Understand in simple terms
+   • Imagine the scenario
+   • Identify input/output
+
+2️⃣ THINK BRUTE FORCE (5 mins)
+   • What's the obvious approach?
+   • What are its limitations?
+   • Why is it inefficient?
+
+3️⃣ THINK OPTIMIZED (10 mins)
+   • What data structure helps?
+   • Can you use pointers, hashing, math?
+   • How to reduce space?
+
+4️⃣ EXPLAIN STAR METHOD (5 mins)
+   • Situation: "At Amazon..."
+   • Task: "I need to..."
+   • Action: "I would use..."
+   • Result: "This gives me..."
+
+5️⃣ CODE IT UP (15 mins)
+   • Write optimized solution
+   • Add comments showing thought
+   • Test with edge cases
+
+6️⃣ DISCUSS TRADE-OFFS (5 mins)
+   • Why this over others?
+   • What if we had different constraints?
+   • How would you optimize further?
+
+
+═══════════════════════════════════════════════════════════════════════════════
+💡 KEY PATTERNS TO MASTER:
+═══════════════════════════════════════════════════════════════════════════════
+
+PATTERN 1: TWO POINTERS
+Problems: #283 (Move Zeroes), #75 (Sort Colors), #56 (Merge Intervals)
+When: Need to manipulate array from both ends or track boundaries
+Key: Often achieves O(n) time, O(1) space
+
+PATTERN 2: BIT MANIPULATION
+Problems: #136 (Single Number), #268 (Missing Number)
+When: Dealing with pairs, XOR cancellations, or binary operations
+Key: XOR property: a ^ a = 0, a ^ 0 = a
+
+PATTERN 3: DYNAMIC PROGRAMMING
+Problems: #152 (Max Product), #238 (Product Except Self)
+When: Need to track state from previous positions
+Key: Track both positive/negative states or left/right passes
+
+PATTERN 4: SORTING + GREEDY
+Problems: #56 (Merge Intervals)
+When: Need to organize data first, then process greedily
+Key: O(n log n) for sorting often worth it
+
+PATTERN 5: IN-PLACE HASHING
+Problems: #41 (First Missing Positive)
+When: Can use array indices as hash keys
+Key: Clever use of array itself instead of extra hashmap
+
+PATTERN 6: VOTING ALGORITHM
+Problems: #169 (Majority Element)
+When: Finding dominant element or majority patterns
+Key: Cancel out minorities, majority survives
+
+PATTERN 7: MATRIX MANIPULATION
+Problems: #48 (Rotate Image)
+When: Working with 2D arrays
+Key: Transpose + reverse, or layer-by-layer approaches
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🚀 AMAZON INTERVIEW TIPS:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. COMMUNICATE CLEARLY
+   ✓ Explain your thinking out loud
+   ✓ Use "At Amazon, we..." to anchor in STAR
+   ✓ Ask clarifying questions
+
+2. OPTIMIZE SPACE FIRST
+   ✓ Amazon loves in-place solutions
+   ✓ O(1) space is highly valued
+   ✓ Show you're thinking about scale
+
+3. EDGE CASES MATTER
+   ✓ Empty arrays
+   ✓ Single element
+   ✓ All same element
+   ✓ Negative numbers
+
+4. TRADE-OFFS
+   ✓ Explain why you chose this approach
+   ✓ Time vs space trade-offs
+   ✓ Scalability concerns
+
+5. TEST YOUR CODE
+   ✓ Walk through with examples
+   ✓ Check edge cases
+   ✓ Verify complexity claims
+
+
+═══════════════════════════════════════════════════════════════════════════════
+📊 QUICK REFERENCE TABLE:
+═══════════════════════════════════════════════════════════════════════════════
+
+| # | Problem               | Difficulty | Pattern          | Space | Best Time |
+|---|----------------------|------------|-----------------|-------|-----------|
+|136| Single Number        | Easy       | Bit Manipulation| O(1)  | O(n)      |
+|217| Contains Duplicate   | Easy       | Hashmap         | O(n)  | O(n)      |
+|268| Missing Number       | Easy       | Math/XOR        | O(1)  | O(n)      |
+|283| Move Zeroes          | Easy       | Two Pointers    | O(1)  | O(n)      |
+|48 | Rotate Image         | Medium     | Matrix          | O(1)  | O(n²)     |
+|189| Rotate Array         | Medium     | Two Pointers    | O(1)  | O(n)      |
+|152| Max Product Subarray | Medium     | DP              | O(1)  | O(n)      |
+|238| Product Except Self  | Medium     | DP              | O(1)* | O(n)      |
+|169| Majority Element     | Medium     | Voting          | O(1)  | O(n)      |
+|75 | Sort Colors          | Medium     | Two Pointers    | O(1)  | O(n)      |
+|56 | Merge Intervals      | Medium     | Sort+Greedy     | O(n)  | O(n log n)|
+|41 | First Missing +ve    | Hard       | In-Place Hash   | O(1)  | O(n)      |
+
+*excluding output array
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🎓 WHAT AMAZON LOOKS FOR:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ CODING SKILLS
+   • Can you implement the optimal solution?
+   • Is your code clean and readable?
+   • Do you handle edge cases?
+
+✅ PROBLEM SOLVING
+   • Can you break down complex problems?
+   • Do you think about trade-offs?
+   • Can you optimize iteratively?
+
+✅ COMMUNICATION
+   • Can you explain your thinking?
+   • Do you ask good questions?
+   • Can you discuss alternatives?
+
+✅ SYSTEM THINKING
+   • Do you consider scalability?
+   • Do you think about Amazon's scale?
+   • Can you optimize for their constraints?
+
+✅ AMAZON CULTURE
+   • Leadership principles in your answers
+   • Ownership of solution quality
+   • Customer-focused thinking
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Good luck with your Amazon interview! 💪
+
+Remember:
+• PRACTICE makes perfect
+• EXPLAIN your thinking
+• OPTIMIZE for space
+• TEST your code
+• DISCUSS trade-offs
+
+You've got this! 🚀

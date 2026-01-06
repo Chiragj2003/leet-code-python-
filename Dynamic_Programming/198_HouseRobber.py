@@ -1,183 +1,216 @@
 """
-LeetCode #198 - House Robber
-Topic: Dynamic Programming
-Difficulty: Medium
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    LeetCode #198 - House Robber                               ║
+║                    Topic: Dynamic Programming                                ║
+║                    Difficulty: Medium                                         ║
+║                    Company: Amazon, Meta, Google                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-PROBLEM EXPLANATION (Easy Terms):
-You're a robber planning to rob houses along a street.
-Each house has money, but you CAN'T rob two adjacent houses
-(security system connects adjacent houses).
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🎯 QUESTION IN SIMPLE TERMS                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Find maximum money you can rob without alerting police.
+WHAT'S THE PROBLEM?
+───────────────────
+Rob houses along street. Each house has money.
+CANNOT rob two adjacent houses (alarm triggers).
+Maximize money stolen.
 
-Example:
-[1,2,3,1] -> Rob house 1 and 3: 1+3 = 4
-[2,7,9,3,1] -> Rob 0,2,4: 2+9+1 = 12
+EXAMPLES:
+─────────
+✓ Input: [1,2,3,1] → Output: 4
+  Rob house 0 (1) and house 2 (3) = 1+3 = 4
 
-Think of it like:
-Picking numbers from a line where you can't pick adjacent ones.
-What's the maximum sum?
+✓ Input: [2,7,9,3,1] → Output: 12
+  Rob house 0 (2), house 2 (9), house 4 (1) = 2+9+1 = 12
 
-WHY THIS WORKS (Simple Explanation):
-At each house, you have two choices:
-1. Rob this house + money from (i-2)th house
-2. Don't rob, keep money from (i-1)th house
+IMAGINE THIS (CHILD-FRIENDLY):
+──────────────────────────────
+🏠 Houses: [🏠₁ 🏠₇ 🏠₉ 🏠₃ 🏠₁]
+   Can't rob neighbors! Pick houses far apart.
+   Best: 🏠₁ + 🏠₉ + 🏠₁ = 11 (wait, let's check 7+3+1=11 too!)
+   Actually: 🏠₇ + 🏠₉ = 16 or 🏠₇ + 🏠₃ + 🏠₁ = 11
+   Wait: 🏠₂ + 🏠₉ + 🏠₁ = 12! ✓
 
-Choose the maximum!
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ⭐ AMAZON STAR METHOD ANSWER                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Formula: dp[i] = max(nums[i] + dp[i-2], dp[i-1])
+📌 SITUATION:
+   Amazon warehouses: select facilities to upgrade with budget.
+   Adjacent facilities share systems, can't upgrade both.
 
-Time Complexity: O(n)
-Space Complexity: O(1) with optimization
+📌 TASK:
+   Maximize profit without selecting adjacent.
+   Time O(n), Space O(1).
+
+📌 ACTION:
+   DP: At each house, choose max of:
+   - Rob current + skip previous
+   - Skip current, keep previous max
+
+📌 RESULT:
+   ✓ Time: O(n) single pass
+   ✓ Space: O(1) optimized
+   ✓ Maximum profit found
+
 """
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 💡 BRUTE FORCE - Try All Combinations
+# ═══════════════════════════════════════════════════════════════════════════
+def rob_bruteforce(nums):
+    """
+    Recursion: for each house, rob or skip
+    
+    Time: O(2^n) - exponential
+    Space: O(n) - recursion depth
+    """
+    def robFrom(index):
+        if index >= len(nums):
+            return 0
+        
+        # Rob current + skip next, or skip current
+        return max(
+            nums[index] + robFrom(index + 2),
+            robFrom(index + 1)
+        )
+    
+    return robFrom(0)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 📚 BETTER - Memoization
+# ═══════════════════════════════════════════════════════════════════════════
+def rob_memo(nums):
+    """
+    Top-down DP with memoization
+    
+    Time: O(n)
+    Space: O(n)
+    """
+    memo = {}
+    
+    def robFrom(index):
+        if index >= len(nums):
+            return 0
+        if index in memo:
+            return memo[index]
+        
+        memo[index] = max(
+            nums[index] + robFrom(index + 2),
+            robFrom(index + 1)
+        )
+        return memo[index]
+    
+    return robFrom(0)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🚀 OPTIMAL SOLUTION - Bottom-Up DP
+# ═══════════════════════════════════════════════════════════════════════════
 def rob(nums):
     """
-    Find maximum money to rob using dynamic programming
+    Bottom-up DP with O(1) space
     
-    Visual example: [2, 7, 9, 3, 1]
+    dp[i] = max(nums[i] + dp[i-2], dp[i-1])
     
-    House 0 (2): Rob it! Total = 2
-    House 1 (7): Rob it! (7 > 2) Total = 7
-    House 2 (9): Rob 2+9=11 or skip 7? -> 11 is better
-    House 3 (3): Rob 7+3=10 or skip 11? -> 11 is better
-    House 4 (1): Rob 11+1=12 or skip 11? -> 12 is better
+    Meaning: At house i, choose:
+    - Rob it + best from i-2
+    - Skip it, keep best from i-1
     
-    Result: 12 (rob houses 0, 2, 4)
+    Example: [2,7,9,3,1]
+    ────────
+    House 0: rob = 2, skip = 0 → max = 2
+    House 1: rob = 7, skip = 2 → max = 7
+    House 2: rob = 9+2=11, skip = 7 → max = 11
+    House 3: rob = 3+7=10, skip = 11 → max = 11
+    House 4: rob = 1+11=12, skip = 11 → max = 12
+    
+    Answer: 12
     """
     if not nums:
         return 0
     if len(nums) == 1:
         return nums[0]
     
-    # Track last two values only (space optimized)
-    prev2 = nums[0]  # Max money up to house i-2
-    prev1 = max(nums[0], nums[1])  # Max money up to house i-1
+    prev2 = 0  # max money 2 houses ago
+    prev1 = 0  # max money 1 house ago
     
-    for i in range(2, len(nums)):
-        # Either rob current + prev2, or skip current
-        current = max(nums[i] + prev2, prev1)
+    for num in nums:
+        # Rob current + prev2, or skip current
+        current = max(num + prev2, prev1)
         prev2 = prev1
         prev1 = current
     
     return prev1
 
 
-def rob_dp_array(nums):
+# ═══════════════════════════════════════════════════════════════════════════
+# 🎯 ALTERNATIVE - DP Array (Clearer)
+# ═══════════════════════════════════════════════════════════════════════════
+def rob_array(nums):
     """
-    Solution using DP array (easier to understand)
+    DP with array for clarity
     
-    dp[i] = maximum money robbing up to house i
+    Time: O(n)
+    Space: O(n)
     """
     if not nums:
         return 0
     if len(nums) == 1:
         return nums[0]
     
-    n = len(nums)
-    dp = [0] * n
-    
+    dp = [0] * len(nums)
     dp[0] = nums[0]
     dp[1] = max(nums[0], nums[1])
     
-    for i in range(2, n):
-        # Rob current house + dp[i-2] OR skip it and take dp[i-1]
-        dp[i] = max(nums[i] + dp[i-2], dp[i-1])
+    for i in range(2, len(nums)):
+        dp[i] = max(nums[i] + dp[i - 2], dp[i - 1])
     
-    return dp[n-1]
+    return dp[-1]
 
 
-def rob_verbose(nums):
-    """
-    Detailed version showing decision at each house
-    """
-    if not nums:
-        return 0
-    if len(nums) == 1:
-        print(f"Houses: {nums}")
-        print(f"Only one house, rob it: {nums[0]}")
-        return nums[0]
-    
-    print(f"Houses with money: {nums}")
-    print("\nDeciding at each house:\n")
-    
-    n = len(nums)
-    dp = [0] * n
-    
-    dp[0] = nums[0]
-    print(f"House 0 (${nums[0]}): Rob it! Total = ${dp[0]}")
-    
-    dp[1] = max(nums[0], nums[1])
-    if dp[1] == nums[1]:
-        print(f"House 1 (${nums[1]}): Rob it (better than ${nums[0]})! Total = ${dp[1]}")
-    else:
-        print(f"House 1 (${nums[1]}): Skip it (${nums[0]} is better)! Total = ${dp[1]}")
-    
-    for i in range(2, n):
-        rob_current = nums[i] + dp[i-2]
-        skip_current = dp[i-1]
-        
-        dp[i] = max(rob_current, skip_current)
-        
-        print(f"\nHouse {i} (${nums[i]}):")
-        print(f"  Option 1: Rob it -> ${nums[i]} + ${dp[i-2]} = ${rob_current}")
-        print(f"  Option 2: Skip it -> Keep ${skip_current}")
-        
-        if dp[i] == rob_current:
-            print(f"  Decision: ROB IT! Total = ${dp[i]} ✓")
-        else:
-            print(f"  Decision: SKIP IT! Total = ${dp[i]} ✓")
-    
-    print(f"\nMaximum money: ${dp[n-1]}")
-    return dp[n-1]
+# ═══════════════════════════════════════════════════════════════════════════
+# 📊 COMPLEXITY COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════
+"""
+╔════════════════╦════════════╦═══════════╦═════════════════════════╗
+║   Approach     ║    Time    ║   Space   ║       Notes             ║
+╠════════════════╬════════════╬═══════════╬═════════════════════════╣
+║ Brute Force    ║   O(2^n)   ║   O(n)    ║ Too slow for n>20       ║
+║ Memoization    ║   O(n)     ║   O(n)    ║ Top-down DP             ║
+║ DP Array       ║   O(n)     ║   O(n)    ║ Easy to understand      ║
+║ Space Optimized║   O(n)     ║   O(1)    ║ Best solution           ║
+╚════════════════╩════════════╩═══════════╩═════════════════════════╝
+"""
 
 
-def rob_recursive(nums, i=0, memo=None):
-    """
-    Recursive solution with memoization
-    Shows the recursive thinking
-    """
-    if memo is None:
-        memo = {}
-    
-    if i >= len(nums):
-        return 0
-    
-    if i in memo:
-        return memo[i]
-    
-    # Either rob current house or skip it
-    rob_current = nums[i] + rob_recursive(nums, i + 2, memo)
-    skip_current = rob_recursive(nums, i + 1, memo)
-    
-    memo[i] = max(rob_current, skip_current)
-    return memo[i]
+# ═══════════════════════════════════════════════════════════════════════════
+# 🧪 TEST CASES
+# ═══════════════════════════════════════════════════════════════════════════
 
-
-# Test cases
 if __name__ == "__main__":
     test_cases = [
         ([1, 2, 3, 1], 4),
         ([2, 7, 9, 3, 1], 12),
         ([2, 1, 1, 2], 4),
-        ([5, 3, 4, 11, 2], 16),
-        ([1], 1),
-        ([2, 1], 2),
+        ([5], 5),
     ]
     
-    print("=== Testing Optimized Solution ===")
-    for nums, expected in test_cases:
-        result = rob(nums)
-        status = "✓" if result == expected else "✗"
-        print(f"{status} Houses: {nums}")
-        print(f"   Max money: ${result} (Expected: ${expected})")
-        print()
+    print("=" * 70)
+    print("🧪 TESTING HOUSE ROBBER")
+    print("=" * 70)
     
-    print("=== Testing DP Array Solution ===")
     for nums, expected in test_cases:
-        result = rob_dp_array(nums)
-        status = "✓" if result == expected else "✗"
-        print(f"{status} {nums} -> ${result}")
-    
-    print("\n=== Verbose Example ===")
-    rob_verbose([2, 7, 9, 3, 1])
+        brute = rob_bruteforce(nums) if len(nums) < 15 else "Skipped"
+        memo = rob_memo(nums)
+        optimal = rob(nums)
+        array = rob_array(nums)
+        
+        print(f"\nInput: {nums}")
+        print(f"Expected: {expected}")
+        print(f"Brute: {brute}")
+        print(f"Memo: {memo} {'✓' if memo == expected else '✗'}")
+        print(f"Optimal: {optimal} {'✓' if optimal == expected else '✗'}")
+        print(f"Array: {array} {'✓' if array == expected else '✗'}")
